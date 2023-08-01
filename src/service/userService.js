@@ -5,16 +5,13 @@ import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
 import { userValidate } from '../validation/userValidation.js';
-import { createPasswordHash, generateToken, checkAuth, mailSender } from '../utils/_index.js';
+import { createPasswordHash, generateToken, checkAuth, mailSender, findUserById } from '../utils/_index.js';
 
 class UserService {
 
     async getUserByToken(token) {
         const { _id } = checkAuth(token);
-        const user = await UserModel.findById(_id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        const user = await findUserById(_id);
 
         return user;
     }
@@ -47,7 +44,7 @@ class UserService {
         const passwordHash = await createPasswordHash(password);
         const user = await UserModel.create({
             ...data,
-            passwordHash,            
+            passwordHash,
         });
 
         if (!user) {
@@ -76,10 +73,7 @@ class UserService {
 
     async update(data, token) {
         const { _id } = checkAuth(token);
-        const user = await UserModel.findById(_id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        await findUserById(_id);
 
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
@@ -95,11 +89,7 @@ class UserService {
 
     async delete(id, token) {
         const { _id } = checkAuth(token);
-
-        const user = await UserModel.findById(_id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        await findUserById(_id);
 
         if (_id === id) {
             const userStatus = await UserModel.deleteOne({ _id });
@@ -166,10 +156,8 @@ class UserService {
         await userValidate({ password });
 
         const { _id } = checkAuth(token);
-        const user = await UserModel.findById(_id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        const user = await findUserById(_id);
+
         const isValidPass = await bcrypt.compare(password, user.passwordHash);
         if (!isValidPass) {
             throw new GraphQLError("Wrong password!")
@@ -183,10 +171,7 @@ class UserService {
         await userValidate({ password });
 
         const { _id } = checkAuth(token);
-        const user = await UserModel.findById(_id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        const user = await findUserById(_id);
 
         const isValidPass = await bcrypt.compare(password, user.passwordHash);
         if (isValidPass) {

@@ -1,14 +1,13 @@
 import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
+import { findUserById } from '../utils/findUserById.js';
 
 class UploadService {
 
     async uploadAvatarUrl(id, avatarURL) {
-        const user = await UserModel.findById(id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        await findUserById(_id);
+
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id: id },
             {
@@ -22,10 +21,8 @@ class UploadService {
     }
 
     async deleteAvatarUrl(_id) {
-        const user = await UserModel.findById(_id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        await findUserById(_id);
+
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
             { avatarURL: null },
@@ -36,10 +33,8 @@ class UploadService {
     }
 
     async uploadLicenseUrl(id, licenseURL) {
-        const user = await UserModel.findById(id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        await findUserById(_id);
+
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id: id },
             {
@@ -53,10 +48,8 @@ class UploadService {
     }
 
     async deleteLicenseUrl(_id) {
-        const user = await UserModel.findById(_id);
-        if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+        await findUserById(_id);
+
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
             { 'license.licenseURL': null },

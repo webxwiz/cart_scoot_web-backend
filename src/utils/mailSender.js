@@ -13,7 +13,7 @@ export const mailSender = async (token, email) => {
     });
 
     const message = {
-        from: `"Yachtease" <${process.env.EMAIL_ADDRESS}>`,
+        from: `"Cart Scoot Web" <${process.env.EMAIL_ADDRESS}>`,
         to: email,
         subject: 'Restore password',
         text: 'Please, follow the link to set new password',

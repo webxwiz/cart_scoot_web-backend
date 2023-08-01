@@ -1,7 +1,7 @@
 {
     "name": "cart_scoot_web-backend",
     "version": "1.0.0",
-    "description": "",
+    "description": "Node JS backend for Cart Scoot Web",
     "main": "index.js",
     "type": "module",
     "engines": {
@@ -14,6 +14,9 @@
     },
     "author": "Dmytro <kotykhin.d@gmail.com>",
     "license": "ISC",
+    "repository": {
+        "url": "https://github.com/DKotykhin/cart_scoot_web-backend.git"
+    },
     "dependencies": {
         "@apollo/server": "^4.9.0",
         "@graphql-tools/schema": "^10.0.0",

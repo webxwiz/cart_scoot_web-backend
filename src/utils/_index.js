@@ -5,3 +5,4 @@ export { mailSender } from './mailSender.js';
 export { multerConfig } from './multerConfig.js';
 export { logger } from './winstonLogger.js';
 export { resizeOneImage } from './resizeOneImage.js';
+export { findUserById } from './findUserById.js';
