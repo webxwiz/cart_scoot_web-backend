@@ -2,15 +2,16 @@ import nodemailer from 'nodemailer';
 
 import 'dotenv/config';
 
-export const mailSender = async (token, email) => {
-    const transport = nodemailer.createTransport({
-        host: "smtp.sendgrid.net",
-        port: 587,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        }
-    });
+const transport = nodemailer.createTransport({
+    host: "smtp.sendgrid.net",
+    port: 587,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    }
+});
+
+export const resetPasswordSender = async (token, email) => {
 
     const message = {
         from: `"Cart Scoot Web" <${process.env.EMAIL_ADDRESS}>`,
@@ -29,4 +30,27 @@ export const mailSender = async (token, email) => {
     const status = await transport.sendMail(message);
 
     return status;
+}
+
+export const requestSender = async (email) => {
+
+    const message = {
+        from: `"Cart Scoot Web" <${process.env.EMAIL_ADDRESS}>`,
+        to: email,
+        subject: 'Car Rent Request',
+        text: 'New car rent request!',
+        html: `
+            <h2>Hello!</h2>
+            <h2>You have new car rent request!</h2>
+            <h4>Please, follow the link for more details</h4>
+            <hr/>
+            <br/>
+            <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
+        `
+    };
+
+    const status = await transport.sendMail(message);
+
+    return status;
+
 }

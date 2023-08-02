@@ -1,3 +1,5 @@
+import requestService from '../service/requestService.js';
+import reviewService from '../service/reviewService.js';
 import userService from '../service/userService.js';
 
 
@@ -67,6 +69,55 @@ const mutationResolver = {
                     message: "Password successfully updated",
                 };
             }
+        },
+
+        addReview: async (parent, { addReviewInput }, contextValue) => {
+            const review = await reviewService.addReview(addReviewInput, contextValue.token);
+
+            return {
+                review,
+                message: `Review successfully created`,
+            };
+        },
+
+        createOneDriverRequest: async (parent, { createOneDriverRequestInput }, contextValue) => {
+            const { request, status } = await requestService.createOneDriverRequest(createOneDriverRequestInput, contextValue.token);
+
+            return {
+                request,
+                status: status.response,
+                message: `Review successfully created. Email successfully sent to ${status.accepted}`,
+            };
+        },
+
+        createDriversRequest: async (parent, { createDriversRequestInput }, contextValue) => {
+            const { request, message } = await requestService.createDriversRequest(createDriversRequestInput, contextValue.token);
+            
+            return { request, message };
+        },
+
+        answerDriver: async (parent, { answerDriverInput }, contextValue) => {
+            const request = await requestService.answerDriver(answerDriverInput, contextValue.token);
+
+            return request;
+        },
+
+        cancelUserRequest: async (parent, { id }, contextValue) => {
+            const requestStatus = await requestService.cancelUserRequest(id, contextValue.token);
+
+            return requestStatus;
+        },
+
+        finishRequest: async (parent, { id }, contextValue) => {
+            const request = await requestService.finishRequest(id, contextValue.token);
+
+            return request;
+        },
+
+        updateWorkingTime: async (parent, { updateWorkingTimeInput }, contextValue) => {
+            const user = await userService.update(updateWorkingTimeInput, contextValue.token);
+
+            return user;
         },
 
     }

@@ -4,8 +4,9 @@ import crypto from 'crypto';
 import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
+
 import { userValidate } from '../validation/userValidation.js';
-import { createPasswordHash, generateToken, checkAuth, mailSender, findUserById } from '../utils/_index.js';
+import { createPasswordHash, generateToken, checkAuth, resetPasswordSender, findUserById } from '../utils/_index.js';
 
 class UserService {
 
@@ -113,7 +114,7 @@ class UserService {
 
         let status;
         try {
-            status = await mailSender(token, email);
+            status = await resetPasswordSender(token, email);
         } catch (err) {
             throw new GraphQLError(err.message || "Can't send email")
         }
@@ -188,6 +189,33 @@ class UserService {
         }
         return updatedUser;
     }
+
+    async getFreeDrivers(requestedTime) {        
+
+        const dayOfWeek = new Date(requestedTime).getDay();
+        const hour = new Date(requestedTime).getHours();
+
+        const drivers = await UserModel.find({
+            workingDays: { $in: dayOfWeek },
+            'workingTime.from': { $lte: hour },
+            'workingTime.to': { $gt: hour },
+        });
+        
+        return drivers;
+    }
+
+    async getDriverProfile(id, token) {
+        const { _id } = checkAuth(token);
+        await findUserById(_id);
+
+        const driverProfile = await UserModel.findOne({ _id: id, role: 'DRIVER' });
+        if (!driverProfile) {
+            throw new GraphQLError("Can't find user")
+        };
+
+        return driverProfile;
+    }
+
 }
 
 export default new UserService;

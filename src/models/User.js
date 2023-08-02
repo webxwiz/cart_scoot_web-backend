@@ -21,15 +21,26 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['ADMIN', 'DRIVER', 'PASSENGER'],
-        default: 'PASSENGER',
+        enum: ['ADMIN', 'DRIVER', 'RIDER'],
+        default: 'RIDER',
     },
-
-}, {
-    timestamps: true,
-    versionKey: false,
-    collection: 'users',
-}
+    driverRequests: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Request',
+        }
+    ],
+    workingDays: [Number],
+    workingTime: {
+        from: Number,
+        to: Number,
+    },
+},
+    {
+        timestamps: true,
+        versionKey: false,
+        collection: 'users',
+    }
 );
 
 export default model('User', userSchema);

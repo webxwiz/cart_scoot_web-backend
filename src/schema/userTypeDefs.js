@@ -3,7 +3,7 @@ export const userTypeDefs = `#graphql
     enum RoleTypes {
         ADMIN
         DRIVER
-        PASSENGER
+        RIDER
     }    
     type User {
         _id: ID!
@@ -12,12 +12,24 @@ export const userTypeDefs = `#graphql
         email: String!
         resetPassword: ResetPasswordTypes
         avatarURL: String        
-        role: RoleTypes               
+        role: RoleTypes
+        license: licenseTypes
+        driverRequests: [String]
+        workingDays: [Int]
+        workingTime: workingTimeTypes          
     }
     type ResetPasswordTypes {
         token: String
         expire: Date
         changed: Date
+    }
+    type licenseTypes {
+        text: String
+        licenseURL: String
+    }
+    type workingTimeTypes {
+        from: Int
+        to: Int
     }
     type UserWithToken {
         user: User        
@@ -46,15 +58,24 @@ export const userTypeDefs = `#graphql
         email: String!
         password: String!
         role: RoleTypes               
-    }    
-
+    }
     input UserSetPasswordInput {
         token: String!
         password: String!
-    }    
+    }
+    input UpdateWorkingTimeInput {
+        workingDays: [Int]
+        workingTime: WorkingTimeInput
+    }
+    input WorkingTimeInput {
+        from: Int
+        to: Int
+    }
 
     type Query {
         getUserByToken: User        
+        getFreeDrivers(requestedTime: Date): [User]
+        getDriverProfile(id: ID!): User   
     }
     type Mutation {
         registerUser(registerUserInput: RegisterUserInput): UserWithToken
@@ -65,6 +86,8 @@ export const userTypeDefs = `#graphql
         setNewPassword(setPasswordInput: UserSetPasswordInput): UserPasswordResponse
         deleteUser(_id: ID!): UserDeleteResponse
         confirmPassword(password: String!): UserPasswordResponse
-        updatePassword(password: String!): UserPasswordResponse      
+        updatePassword(password: String!): UserPasswordResponse
+        updateWorkingTime(updateWorkingTimeInput: UpdateWorkingTimeInput): User
+
     }    
 `;
