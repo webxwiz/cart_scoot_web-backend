@@ -13,13 +13,23 @@ const requestSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['PENDING', 'REJECTED', 'ACTIVE', 'FINISHED'],
+        enum: ['PENDING', 'REJECTED', 'APPROVED', 'ACTIVE', 'FINISHED'],
         default: 'PENDING',
     },
     carType: {
         type: Number,
         enum: [4, 6],
         default: 4
+    },
+    coordinates: {
+        start: {
+            lat: Number,
+            lon: Number,
+        },
+        end: {
+            lat: Number,
+            lon: Number,
+        },
     },
     requestedTime: Date
 },

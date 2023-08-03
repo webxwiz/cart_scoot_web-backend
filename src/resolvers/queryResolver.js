@@ -25,9 +25,21 @@ const queryResolver = {
         },
 
         getDriverProfile: async (parent, { id }, contextValue) => {
-            const driver = await userService.getDriverProfile(id, contextValue.token);
+            const driver = await userService.getProfileById(id, 'DRIVER');
 
             return driver;
+        },
+
+        getRiderProfile: async (parent, { id }, contextValue) => {
+            const rider = await userService.getProfileById(id, 'RIDER');
+
+            return rider;
+        },
+
+        getRequest: async (parent, { id }, contextValue) => {
+            const request = await requestService.getRequest(id, contextValue.token);
+
+            return request;
         },
 
         getAllActiveRequests: async (parent, args, contextValue) => {
@@ -38,6 +50,18 @@ const queryResolver = {
 
         getAllFinishedRequests: async (parent, args, contextValue) => {
             const requests = await requestService.getAllRequestsByStatus('FINISHED', contextValue.token);
+
+            return requests;
+        },
+
+        getNotFinishedRequests: async (parent, args, contextValue) => {
+            const requests = await requestService.getNotFinishedRequests();
+
+            return requests;
+        },
+
+        getFinishedRequestsByDriver: async (parent, { id }, contextValue) => {
+            const requests = await requestService.getFinishedRequestsByDriver(id, contextValue.token);
 
             return requests;
         },

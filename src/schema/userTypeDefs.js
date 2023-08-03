@@ -4,7 +4,15 @@ export const userTypeDefs = `#graphql
         ADMIN
         DRIVER
         RIDER
-    }    
+        SUBADMIN
+        BANNED
+    }
+    enum StatusTypes {
+        PENDING
+        WAITING
+        APPROVED
+        REJECTED
+    }   
     type User {
         _id: ID!
         createdAt: Date                    
@@ -12,22 +20,23 @@ export const userTypeDefs = `#graphql
         email: String!
         resetPassword: ResetPasswordTypes
         avatarURL: String        
+        license: LicenseTypes
         role: RoleTypes
-        license: licenseTypes
         driverRequests: [String]
         workingDays: [Int]
-        workingTime: workingTimeTypes          
+        workingTime: WorkingTimeTypes          
     }
     type ResetPasswordTypes {
         token: String
         expire: Date
         changed: Date
     }
-    type licenseTypes {
-        text: String
-        licenseURL: String
+    type LicenseTypes {
+        url: [String]
+        message: String
+        status: StatusTypes
     }
-    type workingTimeTypes {
+    type WorkingTimeTypes {
         from: Int
         to: Int
     }
@@ -76,6 +85,7 @@ export const userTypeDefs = `#graphql
         getUserByToken: User        
         getFreeDrivers(requestedTime: Date): [User]
         getDriverProfile(id: ID!): User   
+        getRiderProfile(id: ID!): User   
     }
     type Mutation {
         registerUser(registerUserInput: RegisterUserInput): UserWithToken
@@ -88,6 +98,7 @@ export const userTypeDefs = `#graphql
         confirmPassword(password: String!): UserPasswordResponse
         updatePassword(password: String!): UserPasswordResponse
         updateWorkingTime(updateWorkingTimeInput: UpdateWorkingTimeInput): User
+        sendLicenseForApprove: User
 
     }    
 `;

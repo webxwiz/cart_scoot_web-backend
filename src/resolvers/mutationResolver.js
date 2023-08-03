@@ -1,5 +1,6 @@
 import requestService from '../service/requestService.js';
 import reviewService from '../service/reviewService.js';
+import uploadService from '../service/uploadService.js';
 import userService from '../service/userService.js';
 
 
@@ -92,12 +93,28 @@ const mutationResolver = {
 
         createDriversRequest: async (parent, { createDriversRequestInput }, contextValue) => {
             const { request, message } = await requestService.createDriversRequest(createDriversRequestInput, contextValue.token);
-            
+
             return { request, message };
         },
 
-        answerDriver: async (parent, { answerDriverInput }, contextValue) => {
-            const request = await requestService.answerDriver(answerDriverInput, contextValue.token);
+        driverAnswer: async (parent, { AnswerInput }, contextValue) => {
+            const { id, answer } = AnswerInput;
+            const status = answer ? 'APPROVED' : 'REJECTED';
+            const request = await requestService.userAnswer(id, status, contextValue.token);
+
+            return request;
+        },
+
+        riderAnswer: async (parent, { AnswerInput }, contextValue) => {
+            const { id, answer } = AnswerInput;
+            const status = answer ? 'ACTIVE' : 'REJECTED';
+            const request = await requestService.userAnswer(id, status, contextValue.token);
+
+            return request;
+        },
+
+        driverCancel: async (parent, { id }, contextValue) => {
+            const request = await requestService.userAnswer(id, 'REJECTED', contextValue.token);
 
             return request;
         },
@@ -116,6 +133,12 @@ const mutationResolver = {
 
         updateWorkingTime: async (parent, { updateWorkingTimeInput }, contextValue) => {
             const user = await userService.update(updateWorkingTimeInput, contextValue.token);
+
+            return user;
+        },
+
+        sendLicenseForApprove: async (parent, args, contextValue) => {
+            const user = await uploadService.changeLicenseStatus('WAITING', contextValue.token);
 
             return user;
         },

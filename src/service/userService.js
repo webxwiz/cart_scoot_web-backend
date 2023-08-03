@@ -204,18 +204,6 @@ class UserService {
         return drivers;
     }
 
-    async getDriverProfile(id, token) {
-        const { _id } = checkAuth(token);
-        await findUserById(_id);
-
-        const driverProfile = await UserModel.findOne({ _id: id, role: 'DRIVER' });
-        if (!driverProfile) {
-            throw new GraphQLError("Can't find user")
-        };
-
-        return driverProfile;
-    }
-
 }
 
 export default new UserService;

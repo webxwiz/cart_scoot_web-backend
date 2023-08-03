@@ -8,6 +8,16 @@ import { checkAuth, requestSender, findUserById, logger } from '../utils/_index.
 
 class RequestService {
 
+    async getRequest(id, token) {
+        const { _id } = checkAuth(token);
+        await findUserById(_id);
+
+        const request = await RequestModel.findById(id);
+        if (!request) {
+            throw new GraphQLError("Can't find request")
+        } else return request;
+    }
+
     async createOneDriverRequest({ id, description, carType, requestedTime }, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
@@ -86,14 +96,14 @@ class RequestService {
         }
     }
 
-    async answerDriver({ id, answer }, token) {
+    async userAnswer(id, status, token) {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
         const request = await RequestModel.findOneAndUpdate(
             { _id: id },
             {
-                $set: { status: answer ? "ACTIVE" : "REJECTED" }
+                $set: { status }
             },
             { new: true },
         )
@@ -127,11 +137,48 @@ class RequestService {
         } else return request;
     }
 
+    async finishedRequestByDriver(id, token) {
+        const { _id } = checkAuth(token);
+        await findUserById(_id);
+
+        const request = await RequestModel.findOneAndUpdate(
+            { _id: id },
+            {
+                $set: { status: "FINISHED" }
+            },
+            { new: true },
+        )
+        if (!request) {
+            throw new GraphQLError("Modified forbidden")
+        } else return request;
+    }
+
     async getAllRequestsByStatus(status, token) {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
         const requests = await RequestModel.find({ status });
+
+        return requests;
+    }
+
+    async getFinishedRequestsByDriver(id, token) {
+        const { _id } = checkAuth(token);
+        await findUserById(_id);
+
+        const requests = await RequestModel.find({
+            status: 'FINISHED',
+            driverId: id,
+        });
+
+        return requests;
+    }
+
+    async getNotFinishedRequests() {
+
+        const requests = await RequestModel.find({
+            status: { $not: { $eq: 'FINISHED' } },
+        });
 
         return requests;
     }

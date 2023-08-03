@@ -7,6 +7,9 @@ export const findUserById = async (_id) => {
     if (!user) {
         throw new GraphQLError("Can't find user")
     };
+    if (user.role === 'BANNED') {
+        throw new GraphQLError("You've banned on site. Please appeal to administrator")
+    };
 
     return user;
 }

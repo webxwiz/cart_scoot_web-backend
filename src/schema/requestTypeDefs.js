@@ -3,25 +3,25 @@ export const requestTypeDefs = `#graphql
     enum statusTypes {
         PENDING
         REJECTED
+        APPROVED
         ACTIVE
         FINISHED
-    }
-    type Review {
-        createdBy: String
-        driver: String
-        text: String
-        rating: Int
-        createdAt: Date
-    }
-    type CreateReviewAnswer {
-        review: Review
-        message: String
     }
     type Request {
         createdBy: String
         description: String
         status: statusTypes
         carType: Int
+        requestedTime: Date
+        coordinates: Coordinates
+    }
+    type Coordinates {
+        start: LocationTypes
+        end: LocationTypes
+    }
+    type LocationTypes {
+        lat: Float
+        lon: Float
     }
     type CreateOneDriverRequestAnswer {
         request: Request
@@ -33,38 +33,45 @@ export const requestTypeDefs = `#graphql
         message: String
     }
 
-    input AddReviewInput {
-        id: ID!
-        text: String
-        rating: Int
-    }
     input CreateOneDriverRequestInput {
         id: ID!
         description: String
         carType: Int
         requestedTime: Date
+        coordinates: CoordinatesInput
     }
     input CreateDriversRequestInput {
         description: String
         carType: Int
         requestedTime: Date
-    }
-    input AnswerDriverInput {
+        coordinates: CoordinatesInput
+    } 
+    input AnswerInput {
         id: ID!
         answer: Boolean!
     }
+    input CoordinatesInput {
+        start: LocationTypeInput
+        end: LocationTypeInput
+    }
+    input LocationTypeInput {
+        lat: Float
+        lon: Float
+    }
 
     type Query {
-        getReviewsById(id: ID!): [Review]
+        getRequest(id: ID!): Request
         getAllActiveRequests: [Request]
         getAllFinishedRequests: [Request]
+        getNotFinishedRequests: [Request]
+        getFinishedRequestsByDriver(id: ID!): [Request]
     }
     type Mutation {
-        addReview(addReviewInput: AddReviewInput): CreateReviewAnswer
-
         createOneDriverRequest(createOneDriverRequestInput: CreateOneDriverRequestInput): CreateOneDriverRequestAnswer
         createDriversRequest(createDriversRequestInput: CreateDriversRequestInput): CreateAllDriversRequestAnswer
-        answerDriver(answerDriverInput: AnswerDriverInput): Request
+        driverAnswer(driverAnswerInput: AnswerInput): Request
+        driverCancel(id: ID!): Request
+        riderAnswer(riderAnswerInput: AnswerInput): Request
         cancelUserRequest(id: ID!): Boolean
         finishRequest(id: ID!): Request
     }    

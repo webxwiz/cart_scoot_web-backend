@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { Router } from "express";
 
 import { multerConfig, resizeOneImage } from '../utils/_index.js';
@@ -49,12 +51,19 @@ router.delete('/avatar',
 
 router.post('/license',
     authMiddleware,
-    multerConfig.single('license'),
+    multerConfig.fields([
+        { name: 'license', maxCount: 10 },
+    ]),
     async function (req, res, next) {
         try {
-            const fileName = `licenses/${req.userId}-license.webp`
-            const image = await resizeOneImage(req.file.buffer, 600);
-            const licenseURL = await awsS3Service.uploadImageToS3(image, fileName);
+            const licenseURL = [];
+            for (const image of req.files.license) {
+                const fileName = (`licenses/${req.userId}-${crypto.randomBytes(4).toString('hex')}.webp`);
+                const resizedImage = await resizeOneImage(image.buffer, 800);
+                const singleLicenseURL = await awsS3Service.uploadImageToS3(resizedImage, fileName);
+                licenseURL.push(singleLicenseURL);
+            }
+
             const user = await uploadService.uploadLicenseUrl(req.userId, licenseURL);
 
             res.json({
@@ -70,14 +79,18 @@ router.post('/license',
 router.delete('/license',
     authMiddleware,
     async function (req, res, next) {
+        const deleteMarker = [];
         try {
-            const fileName = `licenses/${req.userId}-license.webp`;
-            await awsS3Service.deleteImageFromS3(fileName);
-            const user = await uploadService.deleteLicenseUrl(req.userId);
+            const { imageKeyList, updatedUser } = await uploadService.deleteLicenseUrl(req.userId);
+            for (const key of imageKeyList) {
+                const result = await awsS3Service.deleteImageFromS3(`licenses/${key}`);
+                deleteMarker.push(result.DeleteMarker);
+            }
 
             res.json({
-                user,
-                message: "License successfully deleted.",
+                deleteMarker,
+                user: updatedUser,
+                message: `${deleteMarker.length} images successfully deleted.`,
             });
         } catch (error) {
             next(error)

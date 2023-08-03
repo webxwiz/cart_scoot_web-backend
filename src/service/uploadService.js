@@ -1,3 +1,5 @@
+import { basename } from 'path';
+
 import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
@@ -5,11 +7,11 @@ import { findUserById } from '../utils/findUserById.js';
 
 class UploadService {
 
-    async uploadAvatarUrl(id, avatarURL) {
+    async uploadAvatarUrl(_id, avatarURL) {
         await findUserById(_id);
 
         const updatedUser = await UserModel.findOneAndUpdate(
-            { _id: id },
+            { _id },
             {
                 $set: { avatarURL }
             },
@@ -32,13 +34,14 @@ class UploadService {
         return updatedUser;
     }
 
-    async uploadLicenseUrl(id, licenseURL) {
+    async uploadLicenseUrl(_id, licenseURL) {
         await findUserById(_id);
 
         const updatedUser = await UserModel.findOneAndUpdate(
-            { _id: id },
+            { _id },
             {
-                $set: { 'license.licenseURL': licenseURL }
+                $push: { 'license.url': licenseURL },
+                $set: { 'license.status': 'PENDING' }
             },
             { new: true },
         );
@@ -48,15 +51,35 @@ class UploadService {
     }
 
     async deleteLicenseUrl(_id) {
+        const user = await findUserById(_id);
+
+        const imageKeyList = user.license.url.map(item => basename(item));
+
+        const updatedUser = await UserModel.findOneAndUpdate(
+            { _id },
+            { 'license.url': [] },
+            { new: true },
+        );
+
+        if (!updatedUser) {
+            throw new GraphQLError("Modified forbidden")
+        } else return { imageKeyList, updatedUser };
+    }
+
+    async changeLicenseStatus(status, token) {
+        const { _id } = checkAuth(token);
         await findUserById(_id);
 
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
-            { 'license.licenseURL': null },
+            {
+                $set: { 'license.status': status }
+            },
             { new: true },
         );
-
-        return updatedUser;
+        if (!updatedUser) {
+            throw new GraphQLError("Modified forbidden")
+        } else return updatedUser
     }
 
 }

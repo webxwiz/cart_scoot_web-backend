@@ -16,12 +16,17 @@ const userSchema = new Schema({
     },
     avatarURL: String,
     license: {
-        text: String,
-        licenseURL: String,
+        url: [String],
+        message: String,
+        status: {
+            type: String,
+            enum: ['PENDING', 'WAITING', 'APPROVED', 'REJECTED'],
+            default: 'PENDING',
+        },
     },
     role: {
         type: String,
-        enum: ['ADMIN', 'DRIVER', 'RIDER'],
+        enum: ['ADMIN', 'SUBADMIN', 'DRIVER', 'RIDER', 'BANNED'],
         default: 'RIDER',
     },
     driverRequests: [
