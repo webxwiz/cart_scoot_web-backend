@@ -11,7 +11,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 
-import { requestTypeDefs, reviewTypeDefs, userTypeDefs } from "./schema/_index.js";
+import { advertisementTypeDefs, requestTypeDefs, reviewTypeDefs, userTypeDefs } from "./schema/_index.js";
 import { queryResolver, mutationResolver } from "./resolvers/_index.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { logger } from './utils/_index.js';
@@ -40,7 +40,7 @@ const wsServer = new WebSocketServer({
 });
 
 const schema = makeExecutableSchema({
-    typeDefs: userTypeDefs.concat(requestTypeDefs, reviewTypeDefs),
+    typeDefs: userTypeDefs.concat(requestTypeDefs, reviewTypeDefs, advertisementTypeDefs),
     resolvers: { ...queryResolver, ...mutationResolver },
 });
 

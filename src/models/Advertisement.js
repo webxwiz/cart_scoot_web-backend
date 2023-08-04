@@ -5,6 +5,9 @@ const advertisementSchema = new Schema({
     title: String,
     description: String,
     imageURL: String,
+    link: String,
+    from: Date,
+    to: Date,
 },
     {
         timestamps: true,

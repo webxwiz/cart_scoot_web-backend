@@ -97,6 +97,11 @@ const queryResolver = {
             return users;
         },
 
+        getAllAdvertisements: async (parent, args, contextValue) => {
+            const advertisements = await adminService.getAllAdvertisement();
+
+            return advertisements;
+        },
     },
 };
 
