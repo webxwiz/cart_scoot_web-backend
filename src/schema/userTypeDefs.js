@@ -80,12 +80,25 @@ export const userTypeDefs = `#graphql
         from: Int
         to: Int
     }
+    input ChangeUserRoleInput {
+        id: ID!
+        role: String
+    }
+    input AnswerDriverLicense {
+        id: ID!
+        answer: Boolean
+    }
 
     type Query {
         getUserByToken: User        
         getFreeDrivers(requestedTime: Date): [User]
         getDriverProfile(id: ID!): User   
-        getRiderProfile(id: ID!): User   
+        getRiderProfile(id: ID!): User
+
+        getAllDrivers: [User]
+        getAllRiders: [User]
+        getAllUsers: [User]
+        getAllLicenses: [User]
     }
     type Mutation {
         registerUser(registerUserInput: RegisterUserInput): UserWithToken
@@ -100,5 +113,9 @@ export const userTypeDefs = `#graphql
         updateWorkingTime(updateWorkingTimeInput: UpdateWorkingTimeInput): User
         sendLicenseForApprove: User
 
+        changeUserRole(changeUserRoleInput: ChangeUserRoleInput): User
+        answerDriverLicense(answerDriverLicense: AnswerDriverLicense): User
+        banUser(_id: ID!): User
+        unBanUser(_id: ID!): User
     }    
 `;

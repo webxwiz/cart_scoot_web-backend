@@ -54,3 +54,26 @@ export const requestSender = async (email) => {
     return status;
 
 }
+
+export const banUserSender = async (email) => {
+
+    const message = {
+        from: `"Cart Scoot Web" <${process.env.EMAIL_ADDRESS}>`,
+        to: email,
+        subject: 'Banned information',
+        text: 'Your account banned',
+        html: `
+            <h2>Hello!</h2>
+            <h2>You account has been banned by administrator. Please contact for details</h2>
+            <h4>Please, follow the link for more details</h4>
+            <hr/>
+            <br/>
+            <a href='${process.env.FRONT_URL}/contacts'>Contact link</a>
+        `
+    };
+
+    const status = await transport.sendMail(message);
+
+    return status;
+
+}

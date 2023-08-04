@@ -1,6 +1,7 @@
 import reviewService from '../service/reviewService.js';
 import userService from '../service/userService.js';
 import requestService from '../service/requestService.js';
+import adminService from '../service/adminService.js';
 
 
 const queryResolver = {
@@ -64,6 +65,36 @@ const queryResolver = {
             const requests = await requestService.getFinishedRequestsByDriver(id, contextValue.token);
 
             return requests;
+        },
+
+        getAllDrivers: async (parent, args, contextValue) => {
+            const drivers = await adminService.getProfilesByRole('DRIVER', contextValue.token)
+
+            return drivers;
+        },
+
+        getAllRiders: async (parent, args, contextValue) => {
+            const riders = await adminService.getProfilesByRole('RIDER', contextValue.token)
+
+            return riders;
+        },
+
+        getAllUsers: async (parent, args, contextValue) => {
+            const users = await adminService.getAllUsers(contextValue.token)
+
+            return users;
+        },
+
+        getAllRequests: async (parent, args, contextValue) => {
+            const requests = await adminService.getAllRequests(contextValue.token);
+
+            return requests;
+        },
+
+        getAllLicenses: async (parent, args, contextValue) => {
+            const users = await adminService.getAllLicenses(contextValue.token);
+
+            return users;
         },
 
     },

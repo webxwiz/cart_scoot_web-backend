@@ -1,12 +1,12 @@
 import ReviewModel from '../models/Review.js';
 
-import { checkAuth, findUserById } from '../utils/_index.js';
+import { checkAuth, findUserById, findUserByIdAndRole } from '../utils/_index.js';
 
 class ReviewService {
 
-    async addReview({ id, text, rating }, token) {
+    async addReview({ id, text, rating }, role, token) {
         const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
+        const user = await findUserByIdAndRole(_id, role);
 
         const review = await ReviewModel.create({
             createdBy: user.userName,

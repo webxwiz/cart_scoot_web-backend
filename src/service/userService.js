@@ -26,15 +26,6 @@ class UserService {
         return user;
     }
 
-    async getProfilesByRole(role) {
-        const users = await UserModel.find({ role });
-        if (!users.length) {
-            throw new GraphQLError("Can't find any users")
-        };
-
-        return users;
-    }
-
     async register(data) {
         await userValidate(data);
         const { email, password } = data;

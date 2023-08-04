@@ -26,8 +26,12 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['ADMIN', 'SUBADMIN', 'DRIVER', 'RIDER', 'BANNED'],
+        enum: ['ADMIN', 'SUBADMIN', 'DRIVER', 'RIDER'],
         default: 'RIDER',
+    },
+    banned: {
+        type: Boolean,
+        default: false,
     },
     driverRequests: [
         {

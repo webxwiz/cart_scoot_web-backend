@@ -3,7 +3,7 @@ import { basename } from 'path';
 import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
-import { findUserById } from '../utils/findUserById.js';
+import { findUserById, findUserByIdAndRole, checkAuth } from '../utils/_index.js';
 
 class UploadService {
 
@@ -66,9 +66,9 @@ class UploadService {
         } else return { imageKeyList, updatedUser };
     }
 
-    async changeLicenseStatus(status, token) {
+    async changeLicenseStatus(status, role, token) {
         const { _id } = checkAuth(token);
-        await findUserById(_id);
+        await findUserByIdAndRole(_id, role);
 
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },

@@ -3,7 +3,7 @@ import { GraphQLError } from 'graphql';
 import RequestModel from '../models/Request.js';
 import UserModel from '../models/User.js';
 
-import { checkAuth, requestSender, findUserById, logger } from '../utils/_index.js';
+import { checkAuth, requestSender, findUserById, logger, findUserByIdAndRole } from '../utils/_index.js';
 
 
 class RequestService {
@@ -18,9 +18,9 @@ class RequestService {
         } else return request;
     }
 
-    async createOneDriverRequest({ id, description, carType, requestedTime }, token) {
+    async createOneDriverRequest({ id, description, carType, requestedTime }, role, token) {
         const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
+        const user = await findUserByIdAndRole(_id, role);
         const driver = await findUserById(id);
 
         const request = await RequestModel.create({
@@ -46,9 +46,9 @@ class RequestService {
         return { request, status };
     }
 
-    async createDriversRequest({ description, carType, requestedTime }, token) {
+    async createDriversRequest({ description, carType, requestedTime }, role, token) {
         const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
+        const user = await findUserByIdAndRole(_id, role);
 
         const dayOfWeek = new Date(requestedTime).getDay();
         const hour = new Date(requestedTime).getHours();
@@ -96,9 +96,9 @@ class RequestService {
         }
     }
 
-    async userAnswer(id, status, token) {
+    async userAnswer(id, status, role, token) {
         const { _id } = checkAuth(token);
-        await findUserById(_id);
+        await findUserByIdAndRole(_id, role);
 
         const request = await RequestModel.findOneAndUpdate(
             { _id: id },
@@ -112,18 +112,18 @@ class RequestService {
         } else return request;
     }
 
-    async cancelUserRequest(id, token) {
+    async cancelUserRequest(id, role, token) {
         const { _id } = checkAuth(token);
-        await findUserById(_id);
+        await findUserByIdAndRole(_id, role);
 
         const requestStatus = await RequestModel.deleteOne({ _id: id });
 
         return requestStatus;
     }
 
-    async finishRequest(id, token) {
+    async finishRequest(id, role, token) {
         const { _id } = checkAuth(token);
-        await findUserById(_id);
+        await findUserByIdAndRole(_id, role);
 
         const request = await RequestModel.findOneAndUpdate(
             { _id: id },

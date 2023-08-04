@@ -61,6 +61,7 @@ export const requestTypeDefs = `#graphql
 
     type Query {
         getRequest(id: ID!): Request
+        getAllRequests: [Request]
         getAllActiveRequests: [Request]
         getAllFinishedRequests: [Request]
         getNotFinishedRequests: [Request]

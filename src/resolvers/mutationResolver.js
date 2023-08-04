@@ -1,3 +1,4 @@
+import adminService from '../service/adminService.js';
 import requestService from '../service/requestService.js';
 import reviewService from '../service/reviewService.js';
 import uploadService from '../service/uploadService.js';
@@ -73,7 +74,7 @@ const mutationResolver = {
         },
 
         addReview: async (parent, { addReviewInput }, contextValue) => {
-            const review = await reviewService.addReview(addReviewInput, contextValue.token);
+            const review = await reviewService.addReview(addReviewInput, 'RIDER', contextValue.token);
 
             return {
                 review,
@@ -82,7 +83,7 @@ const mutationResolver = {
         },
 
         createOneDriverRequest: async (parent, { createOneDriverRequestInput }, contextValue) => {
-            const { request, status } = await requestService.createOneDriverRequest(createOneDriverRequestInput, contextValue.token);
+            const { request, status } = await requestService.createOneDriverRequest(createOneDriverRequestInput, 'RIDER', contextValue.token);
 
             return {
                 request,
@@ -92,7 +93,7 @@ const mutationResolver = {
         },
 
         createDriversRequest: async (parent, { createDriversRequestInput }, contextValue) => {
-            const { request, message } = await requestService.createDriversRequest(createDriversRequestInput, contextValue.token);
+            const { request, message } = await requestService.createDriversRequest(createDriversRequestInput, 'RIDER', contextValue.token);
 
             return { request, message };
         },
@@ -100,7 +101,7 @@ const mutationResolver = {
         driverAnswer: async (parent, { AnswerInput }, contextValue) => {
             const { id, answer } = AnswerInput;
             const status = answer ? 'APPROVED' : 'REJECTED';
-            const request = await requestService.userAnswer(id, status, contextValue.token);
+            const request = await requestService.userAnswer(id, status, 'DRIVER', contextValue.token);
 
             return request;
         },
@@ -108,7 +109,7 @@ const mutationResolver = {
         riderAnswer: async (parent, { AnswerInput }, contextValue) => {
             const { id, answer } = AnswerInput;
             const status = answer ? 'ACTIVE' : 'REJECTED';
-            const request = await requestService.userAnswer(id, status, contextValue.token);
+            const request = await requestService.userAnswer(id, status, 'RIDER', contextValue.token);
 
             return request;
         },
@@ -120,13 +121,13 @@ const mutationResolver = {
         },
 
         cancelUserRequest: async (parent, { id }, contextValue) => {
-            const requestStatus = await requestService.cancelUserRequest(id, contextValue.token);
+            const requestStatus = await requestService.cancelUserRequest(id, 'RIDER', contextValue.token);
 
             return requestStatus;
         },
 
         finishRequest: async (parent, { id }, contextValue) => {
-            const request = await requestService.finishRequest(id, contextValue.token);
+            const request = await requestService.finishRequest(id, 'RIDER', contextValue.token);
 
             return request;
         },
@@ -138,7 +139,31 @@ const mutationResolver = {
         },
 
         sendLicenseForApprove: async (parent, args, contextValue) => {
-            const user = await uploadService.changeLicenseStatus('WAITING', contextValue.token);
+            const user = await uploadService.changeLicenseStatus('WAITING', 'DRIVER', contextValue.token);
+
+            return user;
+        },
+
+        changeUserRole: async (parent, { changeUserRoleInput }, contextValue) => {
+            const user = await adminService.changeUserRole(changeUserRoleInput, contextValue.token);
+
+            return user;
+        },
+
+        answerDriverLicense: async (parent, { answerDriverLicense }, contextValue) => {
+            const user = await adminService.answerDriverLicense(answerDriverLicense, contextValue.token);
+
+            return user;
+        },
+
+        banUser: async (parent, { id }, contextValue) => {
+            const user = await adminService.changeBunStatus(id, true, contextValue.token);
+
+            return user;
+        },
+
+        unBanUser: async (parent, { id }, contextValue) => {
+            const user = await adminService.changeBunStatus(id, false, contextValue.token);
 
             return user;
         },
