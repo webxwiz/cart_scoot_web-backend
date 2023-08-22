@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { GraphQLError } from 'graphql';
 
 import RequestModel from '../models/Request.js';
@@ -18,10 +20,16 @@ class RequestService {
         } else return request;
     }
 
-    async createOneDriverRequest({ id, description, carType, requestedTime }, role, token) {
+    async createOneDriverRequest({ id, description, carType, requestedTime, coordinates, pickupLocation, dropoffLocation }, role, token) {
         const { _id } = checkAuth(token);
         const user = await findUserByIdAndRole(_id, role);
         const driver = await findUserById(id);
+
+        const firstPart = crypto.randomBytes(2).toString('hex');
+        const secondPart = crypto.randomBytes(1).toString('hex');
+        const currentDate = new Date();
+        const thirdPart = currentDate.getFullYear().toString();
+        const requestCode = `${firstPart}-${secondPart}${thirdPart.slice(2)}`;
 
         const request = await RequestModel.create({
             createdBy: user.userName,
@@ -30,6 +38,10 @@ class RequestService {
             status: 'PENDING',
             carType,
             requestedTime,
+            coordinates,
+            requestCode,
+            pickupLocation,
+            dropoffLocation,
         });
 
         if (!request) {
@@ -46,7 +58,7 @@ class RequestService {
         return { request, status };
     }
 
-    async createDriversRequest({ description, carType, requestedTime }, role, token) {
+    async createDriversRequest({ description, carType, requestedTime, coordinates, pickupLocation, dropoffLocation }, role, token) {
         const { _id } = checkAuth(token);
         const user = await findUserByIdAndRole(_id, role);
 
@@ -60,12 +72,22 @@ class RequestService {
         });
         const driverEmails = driverArray.map(user => user.email);
 
+        const firstPart = crypto.randomBytes(3).toString('hex');
+        const secondPart = crypto.randomBytes(2).toString('hex');
+        const currentDate = new Date();
+        const thirdPart = currentDate.getFullYear().toString();
+        const requestCode = `${firstPart}-${secondPart}${thirdPart.slice(2)}`;
+
         const request = await RequestModel.create({
             createdBy: user.userName,
             description,
             status: 'PENDING',
             carType,
             requestedTime,
+            requestCode,
+            pickupLocation,
+            dropoffLocation,
+            coordinates,
         });
 
         let statusArray = [];

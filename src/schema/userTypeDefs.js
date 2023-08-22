@@ -68,6 +68,10 @@ export const userTypeDefs = `#graphql
         password: String!
         role: RoleTypes               
     }
+    input ChangePasswordInput {
+        currentPassword: String!
+        password: String!
+    }
     input UserSetPasswordInput {
         token: String!
         password: String!
@@ -105,11 +109,11 @@ export const userTypeDefs = `#graphql
         
         login(email: String!, password: String!): UserWithToken
 
+        changePassword(changePasswordInput: ChangePasswordInput): UserPasswordResponse
         resetPassword(email: String!): ResetPasswordResponse
         setNewPassword(setPasswordInput: UserSetPasswordInput): UserPasswordResponse
+
         deleteUser(_id: ID!): UserDeleteResponse
-        confirmPassword(password: String!): UserPasswordResponse
-        updatePassword(password: String!): UserPasswordResponse
         updateWorkingTime(updateWorkingTimeInput: UpdateWorkingTimeInput): User
         sendLicenseForApprove: User
 

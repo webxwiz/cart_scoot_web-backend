@@ -56,16 +56,10 @@ const mutationResolver = {
             }
         },
 
-        confirmPassword: async (parent, { password }, contextValue) => {
-            const status = await userService.confirmPassword(password, contextValue.token);
+        changePassword: async (parent, { changePasswordInput }, contextValue) => {
+            const user = await userService.changePassword(changePasswordInput, contextValue.token);
 
-            return { ...status };
-        },
-
-        updatePassword: async (parent, { password }, contextValue) => {
-            const updatedUser = await userService.updatePassword(password, contextValue.token);
-
-            if (updatedUser) {
+            if (user) {
                 return {
                     status: true,
                     message: "Password successfully updated",
@@ -88,7 +82,7 @@ const mutationResolver = {
             return {
                 request,
                 status: status.response,
-                message: `Review successfully created. Email successfully sent to ${status.accepted}`,
+                message: `Request successfully created. Email successfully sent to ${status.accepted}`,
             };
         },
 

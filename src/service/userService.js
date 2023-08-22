@@ -144,44 +144,30 @@ class UserService {
         } else return updatedUser;
     }
 
-    async confirmPassword(password, token) {
+    async changePassword({ currentPassword, password }, token) {
         await userValidate({ password });
 
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
-        const isValidPass = await bcrypt.compare(password, user.passwordHash);
+        const isValidPass = await bcrypt.compare(currentPassword, user.passwordHash);
         if (!isValidPass) {
             throw new GraphQLError("Wrong password!")
-        } else return {
-            status: true,
-            message: 'Password confirmed'
+        } else {
+            const passwordHash = await createPasswordHash(password);
+            const updatedUser = await UserModel.findOneAndUpdate(
+                { _id },
+                { passwordHash },
+                { new: true },
+            );
+            if (!updatedUser) {
+                throw new GraphQLError("Can't change password")
+            }
+            return updatedUser;
         }
     }
 
-    async updatePassword(password, token) {
-        await userValidate({ password });
-
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
-
-        const isValidPass = await bcrypt.compare(password, user.passwordHash);
-        if (isValidPass) {
-            throw new GraphQLError("The same password!", { extensions: { code: 'BAD_USER_INPUT' } })
-        }
-        const passwordHash = await createPasswordHash(password);
-        const updatedUser = await UserModel.findOneAndUpdate(
-            { _id },
-            { passwordHash },
-            { new: true },
-        );
-        if (!updatedUser) {
-            throw new GraphQLError("Can't change password")
-        }
-        return updatedUser;
-    }
-
-    async getFreeDrivers(requestedTime) {        
+    async getFreeDrivers(requestedTime) {
 
         const dayOfWeek = new Date(requestedTime).getDay();
         const hour = new Date(requestedTime).getHours();
@@ -191,7 +177,7 @@ class UserService {
             'workingTime.from': { $lte: hour },
             'workingTime.to': { $gt: hour },
         });
-        
+
         return drivers;
     }
 

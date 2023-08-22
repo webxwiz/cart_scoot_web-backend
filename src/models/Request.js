@@ -31,6 +31,9 @@ const requestSchema = new Schema({
             lon: Number,
         },
     },
+    requestCode: String,
+    pickupLocation: String,
+    dropoffLocation: String,
     requestedTime: Date
 },
     {

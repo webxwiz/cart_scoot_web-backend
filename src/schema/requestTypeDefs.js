@@ -14,6 +14,9 @@ export const requestTypeDefs = `#graphql
         carType: Int
         requestedTime: Date
         coordinates: Coordinates
+        requestCode: String
+        pickupLocation: String
+        dropoffLocation: String
     }
     type Coordinates {
         start: LocationTypes
@@ -39,12 +42,16 @@ export const requestTypeDefs = `#graphql
         carType: Int
         requestedTime: Date
         coordinates: CoordinatesInput
+        pickupLocation: String
+        dropoffLocation: String
     }
     input CreateDriversRequestInput {
         description: String
         carType: Int
         requestedTime: Date
         coordinates: CoordinatesInput
+        pickupLocation: String
+        dropoffLocation: String
     } 
     input AnswerInput {
         id: ID!
