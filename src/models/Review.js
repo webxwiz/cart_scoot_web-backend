@@ -3,7 +3,7 @@ const { Schema, model } = mongoose;
 
 const reviewSchema = new Schema({
     createdBy: String,
-    driver: {
+    driverId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,

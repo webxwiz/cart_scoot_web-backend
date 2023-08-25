@@ -2,15 +2,17 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
 const requestSchema = new Schema({
-    createdBy: {
-        type: String,
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
-    description: String,
     driverId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
+        required: true,
     },
+    description: String,
     status: {
         type: String,
         enum: ['PENDING', 'REJECTED', 'APPROVED', 'ACTIVE', 'FINISHED'],

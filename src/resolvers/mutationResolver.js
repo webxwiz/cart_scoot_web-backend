@@ -7,8 +7,8 @@ import userService from '../service/userService.js';
 
 const mutationResolver = {
     Mutation: {
-        registerUser: async (parent, { registerUserInput }) => {
-            const { user, token } = await userService.register(registerUserInput);
+        registerByEmail: async (parent, { registerUserInput }) => {
+            const { user, token } = await userService.registerByEmail(registerUserInput);
 
             return {
                 user,
@@ -16,14 +16,31 @@ const mutationResolver = {
                 message: `User ${user.userName} successfully created`,
             };
         },
-
-        login: async (parent, { email, password }) => {
-            const { user, token } = await userService.login({ email, password })
+        loginByEmail: async (parent, { email, password }) => {
+            const { user, token } = await userService.loginByEmail({ email, password })
 
             return {
                 user,
                 token,
                 message: `User ${user.userName} successfully logged`,
+            };
+        },
+
+        registerByPhone: async (parent, { phoneNumber }) => {
+            const user = await userService.registerByPhone(phoneNumber);
+
+            return {
+                user,
+                message: `User ${user.phone.number} successfully created`,
+            };
+        },
+        loginByPhone: async (parent, { loginByPhoneInput }) => {
+            const { user, token } = await userService.loginByPhone(loginByPhoneInput)
+
+            return {
+                user,
+                token,
+                message: `User ${user.phone.number} successfully logged`,
             };
         },
 

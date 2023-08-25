@@ -3,11 +3,7 @@ const { Schema, model } = mongoose;
 
 const userSchema = new Schema({
     userName: String,
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
+    email: String,
     passwordHash: String,
     resetPassword: {
         token: String,
@@ -44,6 +40,15 @@ const userSchema = new Schema({
         from: Number,
         to: Number,
     },
+    phoneCode: {
+        code: String,
+        expire: Date,
+        updated: Date,
+    },
+    phone: {
+        number: String,
+        confirmed: Boolean
+    }
 },
     {
         timestamps: true,

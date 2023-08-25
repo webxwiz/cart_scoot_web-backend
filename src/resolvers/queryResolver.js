@@ -12,29 +12,26 @@ const queryResolver = {
 
             return user;
         },
-
-        getReviewsById: async (parent, { id }, contextValue) => {
-            const reviews = await reviewService.getReviewsById(id);
-
-            return reviews;
-        },
-
         getFreeDrivers: async (parent, { requestedTime }, contextValue) => {
             const drivers = await userService.getFreeDrivers(requestedTime);
 
             return drivers;
-        },
-
+        },        
         getDriverProfile: async (parent, { id }, contextValue) => {
             const driver = await userService.getProfileById(id, 'DRIVER');
-
+            
             return driver;
-        },
-
+        },        
         getRiderProfile: async (parent, { id }, contextValue) => {
             const rider = await userService.getProfileById(id, 'RIDER');
-
+            
             return rider;
+        },
+        
+        getReviewsById: async (parent, { id }, contextValue) => {
+            const reviews = await reviewService.getReviewsById(id);
+
+            return reviews;
         },
 
         getRequest: async (parent, { id }, contextValue) => {
@@ -42,25 +39,26 @@ const queryResolver = {
 
             return request;
         },
+        getAllRequestsByFilters: async (parent, { getAllRequestsByFiltersInput }, contextValue) => {
+            const requests = await requestService.getAllRequestsByFilters(getAllRequestsByFiltersInput, contextValue.token);
 
+            return requests;
+        },
         getAllActiveRequests: async (parent, args, contextValue) => {
             const requests = await requestService.getAllRequestsByStatus('ACTIVE', contextValue.token);
 
             return requests;
         },
-
         getAllFinishedRequests: async (parent, args, contextValue) => {
             const requests = await requestService.getAllRequestsByStatus('FINISHED', contextValue.token);
 
             return requests;
         },
-
         getNotFinishedRequests: async (parent, args, contextValue) => {
             const requests = await requestService.getNotFinishedRequests();
 
             return requests;
         },
-
         getFinishedRequestsByDriver: async (parent, { id }, contextValue) => {
             const requests = await requestService.getFinishedRequestsByDriver(id, contextValue.token);
 
@@ -72,31 +70,26 @@ const queryResolver = {
 
             return drivers;
         },
-
         getAllRiders: async (parent, args, contextValue) => {
             const riders = await adminService.getProfilesByRole('RIDER', contextValue.token)
 
             return riders;
         },
-
         getAllUsers: async (parent, args, contextValue) => {
             const users = await adminService.getAllUsers(contextValue.token)
 
             return users;
         },
-
         getAllRequests: async (parent, args, contextValue) => {
             const requests = await adminService.getAllRequests(contextValue.token);
 
             return requests;
         },
-
         getAllLicenses: async (parent, args, contextValue) => {
             const users = await adminService.getAllLicenses(contextValue.token);
 
             return users;
         },
-
         getAllAdvertisements: async (parent, args, contextValue) => {
             const advertisements = await adminService.getAllAdvertisement();
 

@@ -6,7 +6,7 @@ import { GraphQLError } from 'graphql';
 import UserModel from '../models/User.js';
 
 import { userValidate } from '../validation/userValidation.js';
-import { createPasswordHash, generateToken, checkAuth, resetPasswordSender, findUserById } from '../utils/_index.js';
+import { createPasswordHash, generateToken, checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.js';
 
 class UserService {
 
@@ -26,7 +26,72 @@ class UserService {
         return user;
     }
 
-    async register(data) {
+    async registerByPhone(phoneNumber) {
+        const smsCode = crypto.randomInt(100000, 999999);
+        const smsSendResult = await smsSender(`Your secret code is ${smsCode}`, phoneNumber);
+        if (!smsSendResult.sid) {
+            throw new GraphQLError("Can't send SMS. Check your number")
+        };
+        const phoneCode = {
+            code: smsCode,
+            expire: Date.now() + (3600 * 1000),
+            updated: Date.now(),
+        }
+        const phone = {
+            number: phoneNumber,
+            confirmed: false,
+        }
+        const candidate = await UserModel.findOne({ 'phone.number': phoneNumber });
+        if (candidate) {
+            const updatedUser = await UserModel.findOneAndUpdate(
+                { _id: candidate._id },
+                {
+                    $set: { phoneCode, phone }
+                },
+                { new: true },
+            );
+            if (!updatedUser) {
+                throw new GraphQLError("Modified forbidden")
+            } else return updatedUser;
+        } else {
+            const user = await UserModel.create({
+                phone,
+                phoneCode,
+            });
+
+            if (!user) {
+                throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
+            } else return user;
+        }
+    }
+
+    async loginByPhone({ phoneNumber, smsCode }) {
+        const user = await UserModel.findOneAndUpdate(
+            {
+                'phone.number': phoneNumber,
+                'phoneCode.code': smsCode,
+                'phoneCode.expire': { $gt: Date.now() },
+                role: 'RIDER',
+            },
+            {
+                $set:
+                {
+                    'phone.confirmed': true,
+                    'phoneCode.updated': Date.now(),
+                }
+            },
+            { new: true },
+        );
+        if (!user) {
+            throw new GraphQLError("Can't login user. Try again")
+        } else {
+            const token = generateToken(user._id, user.role);
+
+            return { user, token }
+        }
+    }
+
+    async registerByEmail(data) {
         await userValidate(data);
         const { email, password } = data;
         const candidate = await UserModel.findOne({ email });
@@ -47,7 +112,7 @@ class UserService {
         return { user, token };
     }
 
-    async login(data) {
+    async loginByEmail(data) {
         await userValidate(data);
         const { email, password } = data;
         const user = await UserModel.findOne({ email });
@@ -105,7 +170,18 @@ class UserService {
 
         let status;
         try {
-            status = await resetPasswordSender(token, email);
+            status = await mailSender({
+                to: email,
+                subject: 'Restore password',
+                text: 'Please, follow the link to set new password',
+                html: `
+                    <h2>Please, follow the link to set new password</h2>
+                    <h4>If you don't restore your password ignore this mail</h4>
+                    <hr/>
+                    <br/>
+                    <a href='${process.env.FRONT_URL}/auth/reset/${token}'>Link for set new password</a>
+                `,
+            });
         } catch (err) {
             throw new GraphQLError(err.message || "Can't send email")
         }

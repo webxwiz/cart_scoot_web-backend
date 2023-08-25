@@ -16,15 +16,16 @@ export const userTypeDefs = `#graphql
     type User {
         _id: ID!
         createdAt: Date                    
-        userName: String!
-        email: String!
+        userName: String
+        email: String
         resetPassword: ResetPasswordTypes
         avatarURL: String        
         license: LicenseTypes
         role: RoleTypes
         driverRequests: [String]
         workingDays: [Int]
-        workingTime: WorkingTimeTypes          
+        workingTime: WorkingTimeTypes
+        phone: PhoneTypes         
     }
     type ResetPasswordTypes {
         token: String
@@ -40,11 +41,19 @@ export const userTypeDefs = `#graphql
         from: Int
         to: Int
     }
+    type PhoneTypes {
+        number: String
+        confirmed: Boolean
+    }
     type UserWithToken {
         user: User        
         token: String
         message: String              
-    }    
+    }
+    type UserWithMessage {
+        user: User        
+        message: String              
+    }   
     type UserDeleteResponse {        
         userStatus: UserDeleteStatus
         message: String
@@ -67,6 +76,10 @@ export const userTypeDefs = `#graphql
         email: String!
         password: String!
         role: RoleTypes               
+    }
+    input LoginByPhoneInput {
+        phoneNumber: String!
+        smsCode: String!
     }
     input ChangePasswordInput {
         currentPassword: String!
@@ -105,9 +118,11 @@ export const userTypeDefs = `#graphql
         getAllLicenses: [User]
     }
     type Mutation {
-        registerUser(registerUserInput: RegisterUserInput): UserWithToken
-        
-        login(email: String!, password: String!): UserWithToken
+        registerByEmail(registerUserInput: RegisterUserInput): UserWithToken        
+        loginByEmail(email: String!, password: String!): UserWithToken
+
+        registerByPhone(phoneNumber: String!): UserWithMessage        
+        loginByPhone(loginByPhoneInput: LoginByPhoneInput): UserWithToken
 
         changePassword(changePasswordInput: ChangePasswordInput): UserPasswordResponse
         resetPassword(email: String!): ResetPasswordResponse

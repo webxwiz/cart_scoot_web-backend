@@ -8,7 +8,8 @@ export const requestTypeDefs = `#graphql
         FINISHED
     }
     type Request {
-        createdBy: String
+        userId: ID!
+        driverId: ID!
         description: String
         status: statusTypes
         carType: Int
@@ -17,6 +18,25 @@ export const requestTypeDefs = `#graphql
         requestCode: String
         pickupLocation: String
         dropoffLocation: String
+        createdAt: Date
+    }
+    type FilterRequest {
+        userId: ID!
+        driverId: Driver
+        description: String
+        status: statusTypes
+        carType: Int
+        requestedTime: Date
+        coordinates: Coordinates
+        requestCode: String
+        pickupLocation: String
+        dropoffLocation: String
+        createdAt: Date
+    }
+    type Driver {
+        _id: ID!                    
+        userName: String!        
+        avatarURL: String                  
     }
     type Coordinates {
         start: LocationTypes
@@ -36,6 +56,13 @@ export const requestTypeDefs = `#graphql
         message: String
     }
 
+    input GetAllRequestsByFiltersInput {
+        status: statusTypes
+        page: Int
+        searchRequestCode: String
+        searchPickupLocation: String
+        searchDropoffLocation: String
+    }
     input CreateOneDriverRequestInput {
         id: ID!
         description: String
@@ -69,6 +96,7 @@ export const requestTypeDefs = `#graphql
     type Query {
         getRequest(id: ID!): Request
         getAllRequests: [Request]
+        getAllRequestsByFilters(getAllRequestsByFiltersInput: GetAllRequestsByFiltersInput): [FilterRequest] 
         getAllActiveRequests: [Request]
         getAllFinishedRequests: [Request]
         getNotFinishedRequests: [Request]

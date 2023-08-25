@@ -2,7 +2,7 @@ export const reviewTypeDefs = `#graphql
     scalar Date    
     type Review {
         createdBy: String
-        driver: String
+        driverId: ID!
         text: String
         rating: Int
         createdAt: Date
