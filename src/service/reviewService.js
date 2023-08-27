@@ -1,6 +1,6 @@
 import ReviewModel from '../models/Review.js';
 
-import { checkAuth, findUserById, findUserByIdAndRole, smsSender, logger } from '../utils/_index.js';
+import { checkAuth, findUserById, findUserByIdAndRole, smsSender, mailSender, logger } from '../utils/_index.js';
 
 class ReviewService {
 
@@ -8,24 +8,20 @@ class ReviewService {
         const { _id } = checkAuth(token);
         const user = await findUserByIdAndRole(_id, role);
 
-        const { email, phone: { number, confirmed } } = await findUserById(id);
+        const { email, phone } = await findUserById(id);
 
-        if (number && confirmed) {
-            await smsSender('Your private information', number);
+        if (phone) {
+            await smsSender('Your private information', phone);
         } else if (email) {
-            try {
-                await mailSender({
-                    to: email,
-                    subject: 'Your subject',
-                    text: 'Your text',
-                    html: `
+            await mailSender({
+                to: email,
+                subject: 'Your subject',
+                text: 'Your text',
+                html: `
                         <h2>Your HTML</h2>                        
                     `,
-                });
-            } catch (err) {
-                logger.error(err.message || "Can't send email")
-            }
-        }
+            });
+        };
 
         const review = await ReviewModel.create({
             createdBy: user.userName,

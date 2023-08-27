@@ -2,6 +2,8 @@ import nodemailer from 'nodemailer';
 
 import 'dotenv/config';
 
+import { logger } from './_index.js';
+
 const transport = nodemailer.createTransport({
     host: "smtp.sendgrid.net",
     port: 587,
@@ -21,7 +23,13 @@ export const mailSender = async ({ to, subject, text, html }) => {
         html,
     };
 
-    const status = await transport.sendMail(message);
+    let status;
 
-    return status;
+    try {
+        status = await transport.sendMail(message);        
+    } catch (err) {        
+        logger.error(err.message + `: Can't send email to ${to}`)
+    }
+
+    return status?.response;
 }

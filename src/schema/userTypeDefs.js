@@ -25,7 +25,7 @@ export const userTypeDefs = `#graphql
         driverRequests: [String]
         workingDays: [Int]
         workingTime: WorkingTimeTypes
-        phone: PhoneTypes         
+        phone: String         
     }
     type ResetPasswordTypes {
         token: String
@@ -40,10 +40,6 @@ export const userTypeDefs = `#graphql
     type WorkingTimeTypes {
         from: Int
         to: Int
-    }
-    type PhoneTypes {
-        number: String
-        confirmed: Boolean
     }
     type UserWithToken {
         user: User        
@@ -78,7 +74,7 @@ export const userTypeDefs = `#graphql
         role: RoleTypes               
     }
     input LoginByPhoneInput {
-        phoneNumber: String!
+        phone: String!
         smsCode: String!
     }
     input ChangePasswordInput {
@@ -121,7 +117,7 @@ export const userTypeDefs = `#graphql
         registerByEmail(registerUserInput: RegisterUserInput): UserWithToken        
         loginByEmail(email: String!, password: String!): UserWithToken
 
-        registerByPhone(phoneNumber: String!): UserWithMessage        
+        registerByPhone(phone: String!): UserWithMessage        
         loginByPhone(loginByPhoneInput: LoginByPhoneInput): UserWithToken
 
         changePassword(changePasswordInput: ChangePasswordInput): UserPasswordResponse

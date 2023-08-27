@@ -26,12 +26,12 @@ const mutationResolver = {
             };
         },
 
-        registerByPhone: async (parent, { phoneNumber }) => {
-            const user = await userService.registerByPhone(phoneNumber);
+        registerByPhone: async (parent, { phone }) => {
+            const user = await userService.registerByPhone(phone);
 
             return {
                 user,
-                message: `User ${user.phone.number} successfully created`,
+                message: `User ${user.phone} successfully created`,
             };
         },
         loginByPhone: async (parent, { loginByPhoneInput }) => {
@@ -40,7 +40,7 @@ const mutationResolver = {
             return {
                 user,
                 token,
-                message: `User ${user.phone.number} successfully logged`,
+                message: `User ${user.phone} successfully logged`,
             };
         },
 

@@ -26,9 +26,9 @@ class UserService {
         return user;
     }
 
-    async registerByPhone(phoneNumber) {
+    async registerByPhone(phone) {
         const smsCode = crypto.randomInt(100000, 999999);
-        const smsSendResult = await smsSender(`Your secret code is ${smsCode}`, phoneNumber);
+        const smsSendResult = await smsSender(`Your secret code is ${smsCode}`, phone);
         if (!smsSendResult.sid) {
             throw new GraphQLError("Can't send SMS. Check your number")
         };
@@ -37,16 +37,12 @@ class UserService {
             expire: Date.now() + (3600 * 1000),
             updated: Date.now(),
         }
-        const phone = {
-            number: phoneNumber,
-            confirmed: false,
-        }
-        const candidate = await UserModel.findOne({ 'phone.number': phoneNumber });
+        const candidate = await UserModel.findOne({ phone });
         if (candidate) {
             const updatedUser = await UserModel.findOneAndUpdate(
                 { _id: candidate._id },
                 {
-                    $set: { phoneCode, phone }
+                    $set: { phoneCode }
                 },
                 { new: true },
             );
@@ -65,22 +61,14 @@ class UserService {
         }
     }
 
-    async loginByPhone({ phoneNumber, smsCode }) {
-        const user = await UserModel.findOneAndUpdate(
+    async loginByPhone({ phone, smsCode }) {
+        const user = await UserModel.findOne(
             {
-                'phone.number': phoneNumber,
+                phone,
                 'phoneCode.code': smsCode,
                 'phoneCode.expire': { $gt: Date.now() },
                 role: 'RIDER',
             },
-            {
-                $set:
-                {
-                    'phone.confirmed': true,
-                    'phoneCode.updated': Date.now(),
-                }
-            },
-            { new: true },
         );
         if (!user) {
             throw new GraphQLError("Can't login user. Try again")

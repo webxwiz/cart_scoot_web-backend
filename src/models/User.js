@@ -43,12 +43,8 @@ const userSchema = new Schema({
     phoneCode: {
         code: String,
         expire: Date,
-        updated: Date,
     },
-    phone: {
-        number: String,
-        confirmed: Boolean
-    }
+    phone: String,
 },
     {
         timestamps: true,

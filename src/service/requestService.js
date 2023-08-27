@@ -5,7 +5,7 @@ import { GraphQLError } from 'graphql';
 import RequestModel from '../models/Request.js';
 import UserModel from '../models/User.js';
 
-import { checkAuth, findUserById, logger, findUserByIdAndRole, mailSender, smsSender } from '../utils/_index.js';
+import { checkAuth, findUserById, findUserByIdAndRole, mailSender, smsSender } from '../utils/_index.js';
 
 
 class RequestService {
@@ -45,7 +45,7 @@ class RequestService {
     async createOneDriverRequest({ id, ...data }, role, token) {
         const { _id } = checkAuth(token);
         await findUserByIdAndRole(_id, role);
-        const { email, phone: { number } } = await findUserById(id);
+        const { email, phone } = await findUserById(id);
 
         const firstPart = crypto.randomBytes(2).toString('hex');
         const secondPart = crypto.randomBytes(1).toString('hex');
@@ -65,27 +65,22 @@ class RequestService {
         }
 
         let status = '';
-        if (number) {
-            const message = await smsSender('Your private information', number);
-            status = message.sid;
+        if (phone) {
+            status = await smsSender('Your private information', phone);
         } else if (email) {
-            try {
-                status = await mailSender({
-                    to: email,
-                    subject: 'Car Rent Request',
-                    text: 'New car rent request!',
-                    html: `
-                        <h2>Hello!</h2>
-                        <h2>You have new car rent request!</h2>
-                        <h4>Please, follow the link for more details</h4>
-                        <hr/>
-                        <br/>
-                        <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
-                    `,
-                });
-            } catch (err) {
-                logger.error(err.message || "Can't send email")
-            }
+            status = await mailSender({
+                to: email,
+                subject: 'Car Rent Request',
+                text: 'New car rent request!',
+                html: `
+                    <h2>Hello!</h2>
+                    <h2>You have new car rent request!</h2>
+                    <h4>Please, follow the link for more details</h4>
+                    <hr/>
+                    <br/>
+                    <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
+                `,
+            });
         }
 
         return { request, status };
@@ -104,7 +99,7 @@ class RequestService {
             'workingTime.to': { $gt: hour },
         });
         const driverEmails = driverArray.map(user => user.email).filter(email => email !== null);
-        const driverPhones = driverArray.map(user => user.phone.number).filter(phone => phone !== null);
+        const driverPhones = driverArray.map(user => user.phone).filter(phone => phone !== null);
 
         const firstPart = crypto.randomBytes(3).toString('hex');
         const secondPart = crypto.randomBytes(2).toString('hex');
@@ -119,69 +114,53 @@ class RequestService {
             ...data
         });
 
+        let smsStatuses = [];
         for (const number of driverPhones) {
-            await smsSender('Your private information', number);
+            const status = await smsSender('Your private information', number);
+            smsStatuses.push(status);
         }
 
-        let statusArray = [];
+        let emailStatuses = [];
         for (const email of driverEmails) {
-            try {
-                const status = await mailSender({
-                    to: email,
-                    subject: 'Car Rent Request',
-                    text: 'New car rent request!',
-                    html: `
-                        <h2>Hello!</h2>
-                        <h2>You have new car rent request!</h2>
-                        <h4>Please, follow the link for more details</h4>
-                        <hr/>
-                        <br/>
-                        <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
-                    `,
-                });
-                statusArray.push(status);
-            } catch (err) {
-                logger.error(err.message || "Can't send email")
-            }
+            const status = await mailSender({
+                to: email,
+                subject: 'Car Rent Request',
+                text: 'New car rent request!',
+                html: `
+                    <h2>Hello!</h2>
+                    <h2>You have new car rent request!</h2>
+                    <h4>Please, follow the link for more details</h4>
+                    <hr/>
+                    <br/>
+                    <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
+                `,
+            });
+            emailStatuses.push(status);
         };
 
-        if (statusArray.length === driverEmails.length) {
-            return {
-                request,
-                message: 'All emails successfully sent',
-            }
-        } else if (!statusArray.length) {
-            return {
-                request,
-                message: "Can't sent any emails",
-            }
-        } else {
-            return {
-                request,
-                message: "Emails particularly sent",
-            }
+        const totalDrivers = smsStatuses.length + emailStatuses.length;
+
+        return {
+            request,
+            message: `Your request successfully sent to ${totalDrivers} drivers`,
         }
     }
 
     async userAnswer(id, status, role, token) {
         const { _id } = checkAuth(token);
-        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
+        const { email, phone } = await findUserByIdAndRole(_id, role);
 
-        if (number && confirmed) {
-            await smsSender('Your private information', number);
+        if (phone) {
+            await smsSender('Your private information', phone);
         } else if (email) {
-            try {
-                await mailSender({
-                    to: email,
-                    subject: 'Your subject',
-                    text: 'Your text',
-                    html: `
-                        <h2>Your HTML</h2>                        
-                    `,
-                });
-            } catch (err) {
-                logger.error(err.message || "Can't send email")
-            }
+            await mailSender({
+                to: email,
+                subject: 'Your subject',
+                text: 'Your text',
+                html: `
+                    <h2>Your HTML</h2>                        
+                `,
+            });
         }
 
         const request = await RequestModel.findOneAndUpdate(
@@ -198,23 +177,19 @@ class RequestService {
 
     async cancelUserRequest(id, role, token) {
         const { _id } = checkAuth(token);
-        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
+        const { email, phone } = await findUserByIdAndRole(_id, role);
 
-        if (number && confirmed) {
-            await smsSender('Your private information', number);
+        if (phone) {
+            await smsSender('Your private information', phone);
         } else if (email) {
-            try {
-                await mailSender({
-                    to: email,
-                    subject: 'Your subject',
-                    text: 'Your text',
-                    html: `
-                        <h2>Your HTML</h2>                        
-                    `,
-                });
-            } catch (err) {
-                logger.error(err.message || "Can't send email")
-            }
+            await mailSender({
+                to: email,
+                subject: 'Your subject',
+                text: 'Your text',
+                html: `
+                    <h2>Your HTML</h2>                        
+                `,
+            });
         }
 
         const requestStatus = await RequestModel.deleteOne({ _id: id });
@@ -224,23 +199,19 @@ class RequestService {
 
     async finishRequest(id, role, token) {
         const { _id } = checkAuth(token);
-        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
+        const { email, phone } = await findUserByIdAndRole(_id, role);
 
-        if (number && confirmed) {
-            await smsSender('Your private information', number);
+        if (phone) {
+            await smsSender('Your private information', phone);
         } else if (email) {
-            try {
-                await mailSender({
-                    to: email,
-                    subject: 'Your subject',
-                    text: 'Your text',
-                    html: `
-                        <h2>Your HTML</h2>                        
-                    `,
-                });
-            } catch (err) {
-                logger.error(err.message || "Can't send email")
-            }
+            await mailSender({
+                to: email,
+                subject: 'Your subject',
+                text: 'Your text',
+                html: `
+                    <h2>Your HTML</h2>                        
+                `,
+            });
         }
 
         const request = await RequestModel.findOneAndUpdate(
