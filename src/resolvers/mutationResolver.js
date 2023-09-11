@@ -17,7 +17,7 @@ const mutationResolver = {
             };
         },
         loginByEmail: async (parent, { email, password }) => {
-            const { user, token } = await userService.loginByEmail({ email, password })
+            const { user, token } = await userService.loginByEmail({ email, password });
 
             return {
                 user,
@@ -35,13 +35,24 @@ const mutationResolver = {
             };
         },
         loginByPhone: async (parent, { loginByPhoneInput }) => {
-            const { user, token } = await userService.loginByPhone(loginByPhoneInput)
+            const { user, token } = await userService.loginByPhone(loginByPhoneInput);
 
             return {
                 user,
                 token,
                 message: `User ${user.phone} successfully logged`,
             };
+        },
+
+        addMobilePhone: async (parent, { phone }, contextValue) => {
+            const user = await userService.addMobilePhone(phone, contextValue.token);
+
+            return user;
+        },
+        confirmMobilePhone: async (parent, { smsCode }, contextValue) => {
+            const user = await userService.confirmMobilePhone(smsCode, contextValue.token);
+
+            return user;
         },
 
         deleteUser: async (parent, { _id }, contextValue) => {
@@ -55,11 +66,17 @@ const mutationResolver = {
 
         resetPassword: async (parent, { email }) => {
             const status = await userService.resetPassword(email);
-
-            return {
-                status: status.response,
-                message: `Email successfully sent to ${status.accepted}`,
-            };
+            if (status) {
+                return {
+                    status,
+                    message: `Email successfully sent to ${email}`,
+                };
+            } else {
+                return {
+                    status,
+                    message: `Can't sent email to ${email}`,
+                };
+            }
         },
 
         setNewPassword: async (parent, { setPasswordInput }) => {
@@ -85,12 +102,9 @@ const mutationResolver = {
         },
 
         addReview: async (parent, { addReviewInput }, contextValue) => {
-            const review = await reviewService.addReview(addReviewInput, 'RIDER', contextValue.token);
+            const review = await reviewService.addReview(addReviewInput, contextValue.token);
 
-            return {
-                review,
-                message: `Review successfully created`,
-            };
+            return review;
         },
 
         createOneDriverRequest: async (parent, { createOneDriverRequestInput }, contextValue) => {
@@ -124,7 +138,6 @@ const mutationResolver = {
 
             return request;
         },
-
         driverCancel: async (parent, { id }, contextValue) => {
             const request = await requestService.userAnswer(id, 'REJECTED', contextValue.token);
 
@@ -145,6 +158,11 @@ const mutationResolver = {
 
         updateWorkingTime: async (parent, { updateWorkingTimeInput }, contextValue) => {
             const user = await userService.update(updateWorkingTimeInput, contextValue.token);
+
+            return user;
+        },
+        addCoordinates: async (parent, { updateCoordinatesInput }, contextValue) => {
+            const user = await userService.update(updateCoordinatesInput, contextValue.token);
 
             return user;
         },

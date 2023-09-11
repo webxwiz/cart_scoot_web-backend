@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
+import ReviewModel from '../models/Review.js';
 
 import { userValidate } from '../validation/userValidation.js';
 import { createPasswordHash, generateToken, checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.js';
@@ -26,18 +27,22 @@ class UserService {
         return user;
     }
 
-    async registerByPhone(phone) {
+    async sendSmsToPhone(phone) {
         const smsCode = crypto.randomInt(100000, 999999);
         const smsSendResult = await smsSender(`Your secret code is ${smsCode}`, phone);
-        if (!smsSendResult.sid) {
+        if (!smsSendResult) {
             throw new GraphQLError("Can't send SMS. Check your number")
         };
-        const phoneCode = {
+        return {
             code: smsCode,
             expire: Date.now() + (3600 * 1000),
             updated: Date.now(),
         }
-        const candidate = await UserModel.findOne({ phone });
+    }
+
+    async registerByPhone(phone) {
+        const phoneCode = await this.sendSmsToPhone(phone);
+        const candidate = await UserModel.findOne({ 'phone.number': phone });
         if (candidate) {
             const updatedUser = await UserModel.findOneAndUpdate(
                 { _id: candidate._id },
@@ -51,7 +56,7 @@ class UserService {
             } else return updatedUser;
         } else {
             const user = await UserModel.create({
-                phone,
+                'phone.number': phone,
                 phoneCode,
             });
 
@@ -64,7 +69,7 @@ class UserService {
     async loginByPhone({ phone, smsCode }) {
         const user = await UserModel.findOne(
             {
-                phone,
+                'phone.number': phone,
                 'phoneCode.code': smsCode,
                 'phoneCode.expire': { $gt: Date.now() },
                 role: 'RIDER',
@@ -116,6 +121,47 @@ class UserService {
         return { user, token }
     }
 
+    async addMobilePhone(phone, token) {
+        const { _id } = checkAuth(token);
+        await findUserById(_id);
+
+        const phoneCode = await this.sendSmsToPhone(phone);
+        const updatedUser = await UserModel.findOneAndUpdate(
+            { _id },
+            {
+                $set: { 'phone.number': phone, phoneCode }
+            },
+            { new: true },
+        );
+        if (!updatedUser) {
+            throw new GraphQLError("Modified forbidden")
+        } else return updatedUser;
+    }
+
+    async confirmMobilePhone(smsCode, token) {
+        const { _id } = checkAuth(token);
+
+        const user = await UserModel.findOneAndUpdate(
+            {
+                _id,
+                'phoneCode.code': smsCode,
+                'phoneCode.expire': { $gt: Date.now() },
+            },
+            {
+                $set: {
+                    'phoneCode.code': "",
+                    'phoneCode.expire': Date.now(),
+                    'phone.confirmed': true,
+                }
+            },
+            { new: true },
+        );
+        if (!user) {
+            throw new GraphQLError("Can't confirm your phone. Try again")
+        }
+        return user;
+    }
+
     async update(data, token) {
         const { _id } = checkAuth(token);
         await findUserById(_id);
@@ -156,24 +202,18 @@ class UserService {
         if (!buffer) throw new GraphQLError("Something get wrong")
         const token = buffer.toString('hex');
 
-        let status;
-        try {
-            status = await mailSender({
-                to: email,
-                subject: 'Restore password',
-                text: 'Please, follow the link to set new password',
-                html: `
+        await mailSender({
+            to: email,
+            subject: 'Restore password',
+            text: 'Please, follow the link to set new password',
+            html: `
                     <h2>Please, follow the link to set new password</h2>
                     <h4>If you don't restore your password ignore this mail</h4>
                     <hr/>
                     <br/>
                     <a href='${process.env.FRONT_URL}/auth/reset/${token}'>Link for set new password</a>
                 `,
-            });
-        } catch (err) {
-            throw new GraphQLError(err.message || "Can't send email")
-        }
-
+        });
         const updatedUser = await UserModel.findOneAndUpdate(
             { email },
             {
@@ -184,7 +224,7 @@ class UserService {
         );
         if (!updatedUser) {
             throw new GraphQLError("Can't reset password")
-        } else return status;
+        } else return true;
     }
 
     async setNewPassword({ token, password }) {
@@ -241,8 +281,24 @@ class UserService {
             'workingTime.from': { $lte: hour },
             'workingTime.to': { $gt: hour },
         });
+        const driverIds = drivers.map(driver => driver._id);
 
-        return drivers;
+        const driverReviews = await ReviewModel
+            .aggregate()
+            .match({ driverId: { $in: driverIds } })
+            .group({
+                _id: '$driverId',
+                totalCount: { $sum: 1 },
+                avgRating: { $avg: '$rating' },
+            });
+            const driverWithRating = drivers.map((driver, i) => {
+                return {
+                    driver,
+                    rating: Math.round(driverReviews[i].avgRating * 10) / 10,                    
+                }
+            });
+           
+        return driverWithRating;
     }
 
 }

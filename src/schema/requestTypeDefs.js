@@ -8,6 +8,8 @@ export const requestTypeDefs = `#graphql
         FINISHED
     }
     type Request {
+        _id: ID
+        createdAt: Date
         userId: ID!
         driverId: ID!
         description: String
@@ -18,9 +20,10 @@ export const requestTypeDefs = `#graphql
         requestCode: String
         pickupLocation: String
         dropoffLocation: String
-        createdAt: Date
     }
-    type FilterRequest {
+    type RequestWithPopulatedFields {
+        _id: ID
+        createdAt: Date
         userId: ID!
         driverId: Driver
         description: String
@@ -31,7 +34,10 @@ export const requestTypeDefs = `#graphql
         requestCode: String
         pickupLocation: String
         dropoffLocation: String
-        createdAt: Date
+    }
+    type RequestWithRating {
+        request: RequestWithPopulatedFields
+        avgRating: Float
     }
     type Driver {
         _id: ID!                    
@@ -94,9 +100,9 @@ export const requestTypeDefs = `#graphql
     }
 
     type Query {
-        getRequest(id: ID!): Request
+        getRequest(id: ID!): RequestWithRating
         getAllRequests: [Request]
-        getAllRequestsByFilters(getAllRequestsByFiltersInput: GetAllRequestsByFiltersInput): [FilterRequest] 
+        getAllRequestsByFilters(getAllRequestsByFiltersInput: GetAllRequestsByFiltersInput): [RequestWithPopulatedFields] 
         getAllActiveRequests: [Request]
         getAllFinishedRequests: [Request]
         getNotFinishedRequests: [Request]

@@ -4,13 +4,13 @@ import AdvertisementModel from '../models/Advertisement.js';
 import RequestModel from '../models/Request.js';
 import UserModel from '../models/User.js';
 
-import { checkAuth, findUserById, logger, mailSender, smsSender } from '../utils/_index.js';
+import { checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.js';
 
 class AdminService {
 
     async getAllAdvertisement() {
         const advertisements = await AdvertisementModel.find();
-        if (!advertisements.length) {
+        if (advertisements) {
             throw new GraphQLError("Can't find any advertisements")
         };
 
@@ -102,17 +102,15 @@ class AdminService {
     }
 
     async sendBannedInfo(_id) {
-        const user = await findUserById(_id);
-        let status;
+        const user = await findUserById(_id);        
         if (user.phone.number) {
             return await smsSender(`Your secret code is ${smsCode}`, phoneNumber);
         } else {
-            try {
-                status = await mailSender({
-                    to: user.email,
-                    subject: 'Banned information',
-                    text: 'Your account banned',
-                    html: `
+            await mailSender({
+                to: user.email,
+                subject: 'Banned information',
+                text: 'Your account banned',
+                html: `
                         <h2>Hello!</h2>
                         <h2>You account has been banned by administrator. Please contact for details</h2>
                         <h4>Please, follow the link for more details</h4>
@@ -120,11 +118,8 @@ class AdminService {
                         <br/>
                         <a href='${process.env.FRONT_URL}/contacts'>Contact link</a>
                     `,
-                });
-            } catch (err) {
-                logger.error(err.message || "Can't send email")
-            }
-            return status;
+            });
+            return true;
         }
     }
 

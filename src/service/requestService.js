@@ -4,6 +4,7 @@ import { GraphQLError } from 'graphql';
 
 import RequestModel from '../models/Request.js';
 import UserModel from '../models/User.js';
+import ReviewModel from '../models/Review.js';
 
 import { checkAuth, findUserById, findUserByIdAndRole, mailSender, smsSender } from '../utils/_index.js';
 
@@ -14,10 +15,23 @@ class RequestService {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
-        const request = await RequestModel.findById(id);
+        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
+        const request = await RequestModel.findById(id)
+            .populate({ path: 'driverId', select: userPopulatedFields });
         if (!request) {
             throw new GraphQLError("Can't find request")
-        } else return request;
+        };
+        const driverReviews = await ReviewModel
+            .aggregate()
+            .match({ driverId: request.driverId._id })
+            .group({
+                _id: '$driverId',
+                totalCount: { $sum: 1 },
+                avgRating: { $avg: '$rating' },
+            });
+        const avgRating = Math.round(driverReviews[0].avgRating * 10) / 10;
+
+        return { request, avgRating };
     }
 
     async getAllRequestsByFilters(
@@ -26,7 +40,7 @@ class RequestService {
         await findUserById(_id);
 
         const validPage = page ? page > 0 ? page : 1 : 1;
-
+        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
         const requests = await RequestModel.find
             ({
                 userId: _id,
@@ -37,7 +51,7 @@ class RequestService {
             })
             .limit(6 * validPage)
             .sort({ createdAt: -1 })
-            .populate('driverId');
+            .populate({ path: 'driverId', select: userPopulatedFields });
 
         return requests;
     }
@@ -45,7 +59,7 @@ class RequestService {
     async createOneDriverRequest({ id, ...data }, role, token) {
         const { _id } = checkAuth(token);
         await findUserByIdAndRole(_id, role);
-        const { email, phone } = await findUserById(id);
+        const { email, phone: { number, confirmed } } = await findUserById(id);
 
         const firstPart = crypto.randomBytes(2).toString('hex');
         const secondPart = crypto.randomBytes(1).toString('hex');
@@ -65,8 +79,8 @@ class RequestService {
         }
 
         let status = '';
-        if (phone) {
-            status = await smsSender('Your private information', phone);
+        if (number && confirmed) {
+            status = await smsSender('Your private information', number);
         } else if (email) {
             status = await mailSender({
                 to: email,
@@ -83,7 +97,7 @@ class RequestService {
             });
         }
 
-        return { request, status };
+        return { request, status: status.statusCode };
     }
 
     async createDriversRequest({ ...data }, role, token) {
@@ -99,7 +113,7 @@ class RequestService {
             'workingTime.to': { $gt: hour },
         });
         const driverEmails = driverArray.map(user => user.email).filter(email => email !== null);
-        const driverPhones = driverArray.map(user => user.phone).filter(phone => phone !== null);
+        const driverPhones = driverArray.map(user => user.phone.number).filter(item => item !== null);
 
         const firstPart = crypto.randomBytes(3).toString('hex');
         const secondPart = crypto.randomBytes(2).toString('hex');
@@ -135,10 +149,11 @@ class RequestService {
                     <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
                 `,
             });
-            emailStatuses.push(status);
+            emailStatuses.push(status.statusCode);
         };
+        const successEmailsCount = emailStatuses.map(item => item === 202);
 
-        const totalDrivers = smsStatuses.length + emailStatuses.length;
+        const totalDrivers = smsStatuses.length + successEmailsCount.length;
 
         return {
             request,
@@ -148,10 +163,10 @@ class RequestService {
 
     async userAnswer(id, status, role, token) {
         const { _id } = checkAuth(token);
-        const { email, phone } = await findUserByIdAndRole(_id, role);
+        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
 
-        if (phone) {
-            await smsSender('Your private information', phone);
+        if (number && confirmed) {
+            await smsSender('Your private information', number);
         } else if (email) {
             await mailSender({
                 to: email,
@@ -177,10 +192,10 @@ class RequestService {
 
     async cancelUserRequest(id, role, token) {
         const { _id } = checkAuth(token);
-        const { email, phone } = await findUserByIdAndRole(_id, role);
+        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
 
-        if (phone) {
-            await smsSender('Your private information', phone);
+        if (number && confirmed) {
+            await smsSender('Your private information', number);
         } else if (email) {
             await mailSender({
                 to: email,
@@ -199,10 +214,10 @@ class RequestService {
 
     async finishRequest(id, role, token) {
         const { _id } = checkAuth(token);
-        const { email, phone } = await findUserByIdAndRole(_id, role);
+        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
 
-        if (phone) {
-            await smsSender('Your private information', phone);
+        if (number && confirmed) {
+            await smsSender('Your private information', number);
         } else if (email) {
             await mailSender({
                 to: email,

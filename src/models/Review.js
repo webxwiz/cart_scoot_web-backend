@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
 const reviewSchema = new Schema({
-    createdBy: String,
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
     driverId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -13,7 +17,8 @@ const reviewSchema = new Schema({
         type: Number,
         enum: [0, 1, 2, 3, 4, 5],
         default: 0
-    }
+    },
+    requestCode: String,
 },
     {
         timestamps: true,

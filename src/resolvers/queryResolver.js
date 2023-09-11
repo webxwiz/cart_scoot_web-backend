@@ -16,28 +16,33 @@ const queryResolver = {
             const drivers = await userService.getFreeDrivers(requestedTime);
 
             return drivers;
-        },        
+        },
         getDriverProfile: async (parent, { id }, contextValue) => {
             const driver = await userService.getProfileById(id, 'DRIVER');
-            
+
             return driver;
-        },        
+        },
         getRiderProfile: async (parent, { id }, contextValue) => {
             const rider = await userService.getProfileById(id, 'RIDER');
-            
+
             return rider;
         },
-        
-        getReviewsById: async (parent, { id }, contextValue) => {
-            const reviews = await reviewService.getReviewsById(id);
+
+        getReviewsById: async (parent, { driverId }, contextValue) => {
+            const reviews = await reviewService.getReviewsById(driverId);
+
+            return reviews;
+        },
+        getAllReviews: async (parent, { pageNumber }, contextValue) => {
+            const reviews = await reviewService.getAllReviews(pageNumber);
 
             return reviews;
         },
 
         getRequest: async (parent, { id }, contextValue) => {
-            const request = await requestService.getRequest(id, contextValue.token);
+            const { request, avgRating } = await requestService.getRequest(id, contextValue.token);
 
-            return request;
+            return { request, avgRating };
         },
         getAllRequestsByFilters: async (parent, { getAllRequestsByFiltersInput }, contextValue) => {
             const requests = await requestService.getAllRequestsByFilters(getAllRequestsByFiltersInput, contextValue.token);

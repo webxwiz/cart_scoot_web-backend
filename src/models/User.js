@@ -44,7 +44,17 @@ const userSchema = new Schema({
         code: String,
         expire: Date,
     },
-    phone: String,
+    phone: {
+        number: String,
+        confirmed: {
+            type: Boolean,
+            default: false,
+        },
+    },
+    coordinates: {
+        lat: Number,
+        lon: Number,
+    },
 },
     {
         timestamps: true,
