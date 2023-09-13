@@ -25,7 +25,21 @@ export const userTypeDefs = `#graphql
         driverRequests: [String]
         workingDays: [Int]
         workingTime: WorkingTimeTypes
-        phone: String         
+        phone: PhoneTypes
+        coordinates: DriverCoordinates         
+    }
+    type Driver {
+        _id: ID!
+        userName: String
+        avatarURL: String
+        phone: PhoneTypes
+        workingDays: [Int]
+        workingTime: WorkingTimeTypes
+        coordinates: DriverCoordinates
+    }
+    type DriverWithRating {
+        driver: Driver
+        rating: Float
     }
     type ResetPasswordTypes {
         token: String
@@ -40,6 +54,14 @@ export const userTypeDefs = `#graphql
     type WorkingTimeTypes {
         from: Int
         to: Int
+    }
+    type PhoneTypes {
+        number: String
+        confirmed: Boolean
+    }
+    type DriverCoordinates {
+        lat: Float
+        lon: Float
     }
     type UserWithToken {
         user: User        
@@ -60,10 +82,6 @@ export const userTypeDefs = `#graphql
     }
     type UserPasswordResponse {
         status: Boolean
-        message: String
-    }
-    type ResetPasswordResponse {
-        status: String
         message: String
     }       
     
@@ -101,10 +119,17 @@ export const userTypeDefs = `#graphql
         id: ID!
         answer: Boolean
     }
+    input UpdateCoordinatesInput {
+        coordinates: DriverCoordinatesInput
+    }
+    input DriverCoordinatesInput {
+        lat: Float
+        lon: Float
+    }
 
     type Query {
         getUserByToken: User        
-        getFreeDrivers(requestedTime: Date): [User]
+        getFreeDrivers(requestedTime: Date): [DriverWithRating]
         getDriverProfile(id: ID!): User   
         getRiderProfile(id: ID!): User
 
@@ -120,8 +145,11 @@ export const userTypeDefs = `#graphql
         registerByPhone(phone: String!): UserWithMessage        
         loginByPhone(loginByPhoneInput: LoginByPhoneInput): UserWithToken
 
+        addMobilePhone(phone: String!): User
+        confirmMobilePhone(smsCode: String!): User
+
         changePassword(changePasswordInput: ChangePasswordInput): UserPasswordResponse
-        resetPassword(email: String!): ResetPasswordResponse
+        resetPassword(email: String!): UserPasswordResponse
         setNewPassword(setPasswordInput: UserSetPasswordInput): UserPasswordResponse
 
         deleteUser(_id: ID!): UserDeleteResponse
@@ -132,5 +160,7 @@ export const userTypeDefs = `#graphql
         answerDriverLicense(answerDriverLicense: AnswerDriverLicense): User
         banUser(_id: ID!): User
         unBanUser(_id: ID!): User
+
+        addCoordinates(updateCoordinatesInput: UpdateCoordinatesInput): User
     }    
 `;

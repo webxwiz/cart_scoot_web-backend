@@ -8,6 +8,7 @@ const advertisementSchema = new Schema({
     link: String,
     from: Date,
     to: Date,
+    position: [String],
 },
     {
         timestamps: true,
