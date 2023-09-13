@@ -9,20 +9,23 @@ class ReviewService {
         await findUserByIdAndRole(_id, 'RIDER');
         const { driverId } = data;
 
-        // const { email, phone: { number, confirmed } } = await findUserById(driverId);
+        const { email, phone: { number, confirmed } } = await findUserById(driverId);
 
-        // if (number && confirmed) {
-        //     await smsSender('Your private information', number);
-        // } else if (email) {
-        //     await mailSender({
-        //         to: email,
-        //         subject: 'Your subject',
-        //         text: 'Your text',
-        //         html: `
-        //                 <h2>Your HTML</h2>                        
-        //             `,
-        //     });
-        // };
+        if (number && confirmed) {
+            await smsSender(`Your have new review! Your rating ${data.rating}. Message: ${data.text}`, number);
+        } else if (email) {
+            await mailSender({
+                to: email,
+                subject: 'Your have new review!',
+                text: 'Your have new review!',
+                html: `
+                        <h2>Your have new review!</h2>
+                        <h4>Your rating ${data.rating}</h4>
+                        <p>Message:</p>                      
+                        <p>${data.text}</p>                      
+                    `,
+            });
+        };
 
         const review = await ReviewModel.create({
             createdBy: _id,

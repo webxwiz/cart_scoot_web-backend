@@ -35,7 +35,7 @@ class RequestService {
     }
 
     async getAllRequestsByFilters(
-        { status, page, searchRequestCode, searchPickupLocation, searchDropoffLocation }, token) {
+        { status, page, searchRequestCode, dateFrom, dateTo }, token) {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
@@ -44,10 +44,9 @@ class RequestService {
         const requests = await RequestModel.find
             ({
                 userId: _id,
+                createdAt: { $gte: dateFrom, $lte: dateTo },
                 ...(status && { status }),
                 ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-                ...(searchPickupLocation && { pickupLocation: { $regex: searchPickupLocation, $options: 'i' } }),
-                ...(searchDropoffLocation && { dropoffLocation: { $regex: searchDropoffLocation, $options: 'i' } }),
             })
             .limit(6 * validPage)
             .sort({ createdAt: -1 })

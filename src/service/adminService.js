@@ -104,7 +104,7 @@ class AdminService {
     async sendBannedInfo(_id) {
         const user = await findUserById(_id);        
         if (user.phone.number) {
-            return await smsSender(`Your secret code is ${smsCode}`, phoneNumber);
+            return await smsSender(`Your account with email - ${user.email} has been banned by administrator`, phoneNumber);
         } else {
             await mailSender({
                 to: user.email,

@@ -66,8 +66,8 @@ export const requestTypeDefs = `#graphql
         status: statusTypes
         page: Int
         searchRequestCode: String
-        searchPickupLocation: String
-        searchDropoffLocation: String
+        dateFrom: Date
+        dateTo: Date
     }
     input CreateOneDriverRequestInput {
         id: ID!
