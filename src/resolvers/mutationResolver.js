@@ -112,7 +112,7 @@ const mutationResolver = {
 
             return {
                 request,
-                status: status.response,
+                status,
                 message: `Request successfully created. Email successfully sent to ${status.accepted}`,
             };
         },

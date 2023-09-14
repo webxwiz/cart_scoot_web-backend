@@ -44,7 +44,7 @@ class RequestService {
         const requests = await RequestModel.find
             ({
                 userId: _id,
-                createdAt: { $gte: dateFrom, $lte: dateTo },
+                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
                 ...(status && { status }),
                 ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
             })
@@ -77,7 +77,7 @@ class RequestService {
             throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
         }
 
-        let status = '';
+        let status = {};
         if (number && confirmed) {
             status = await smsSender('Your private information', number);
         } else if (email) {
@@ -96,7 +96,7 @@ class RequestService {
             });
         }
 
-        return { request, status: status.statusCode };
+        return { request, status: status[0].statusCode };
     }
 
     async createDriversRequest({ ...data }, role, token) {
@@ -148,7 +148,7 @@ class RequestService {
                     <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
                 `,
             });
-            emailStatuses.push(status.statusCode);
+            emailStatuses.push(status[0].statusCode);
         };
         const successEmailsCount = emailStatuses.map(item => item === 202);
 
