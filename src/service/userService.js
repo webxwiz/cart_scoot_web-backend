@@ -211,7 +211,7 @@ class UserService {
                     <h4>If you don't restore your password ignore this mail</h4>
                     <hr/>
                     <br/>
-                    <a href='${process.env.FRONT_URL}/auth/reset/${token}'>Link for set new password</a>
+                    <a href='${process.env.FRONT_URL}/set-new-password/${token}'>Link for set new password</a>
                 `,
         });
         const updatedUser = await UserModel.findOneAndUpdate(

@@ -16,7 +16,8 @@ router.post('/avatar',
     multerConfig.single('avatar'),
     async function (req, res, next) {
         try {
-            const fileName = `avatars/${req.userId}-avatar.webp`
+            const partName = crypto.randomBytes(1).toString('hex');
+            const fileName = `avatars/${req.userId}-${partName}-avatar.webp`
             const image = await resizeOneImage(req.file.buffer, 100);
             const avatarURL = await awsS3Service.uploadImageToS3(image, fileName);
             const user = await uploadService.uploadAvatarUrl(req.userId, avatarURL);
