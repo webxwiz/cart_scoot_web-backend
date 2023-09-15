@@ -271,16 +271,28 @@ class UserService {
         }
     }
 
-    async getFreeDrivers(requestedTime) {
+    async getFreeDrivers({ requestedTime, requestedDate }) {
 
-        const dayOfWeek = new Date(requestedTime).getDay();
+        const dayOfWeek = new Date(requestedDate).getDay();
         const hour = new Date(requestedTime).getHours();
 
-        const drivers = await UserModel.find({
-            workingDays: { $in: dayOfWeek },
-            'workingTime.from': { $lte: hour },
-            'workingTime.to': { $gt: hour },
-        });
+        let drivers;
+        if (requestedTime) {
+            drivers = await UserModel.find({
+                workingDays: { $in: dayOfWeek },
+                'workingTime.from': { $lte: hour },
+                'workingTime.to': { $gt: hour },
+                role: 'DRIVER',
+            });
+        } else if (requestedDate) {
+            drivers = await UserModel.find({
+                workingDays: { $in: dayOfWeek },
+                role: 'DRIVER'
+            });
+        } else {
+            drivers = await UserModel.find({ role: 'DRIVER' });
+        }
+
         const driverIds = drivers.map(driver => driver._id);
 
         const driverReviews = await ReviewModel
@@ -291,13 +303,13 @@ class UserService {
                 totalCount: { $sum: 1 },
                 avgRating: { $avg: '$rating' },
             });
-            const driverWithRating = drivers.map((driver, i) => {
-                return {
-                    driver,
-                    rating: Math.round(driverReviews[i].avgRating * 10) / 10,                    
-                }
-            });
-           
+        const driverWithRating = drivers.map((driver, i) => {
+            return {
+                driver,
+                rating: Math.round(driverReviews[i].avgRating * 10) / 10,
+            }
+        });
+
         return driverWithRating;
     }
 

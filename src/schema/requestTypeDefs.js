@@ -25,7 +25,7 @@ export const requestTypeDefs = `#graphql
         _id: ID
         createdAt: Date
         userId: ID!
-        driverId: Driver
+        driverId: DriverInRequest
         description: String
         status: statusTypes
         carType: Int
@@ -39,10 +39,11 @@ export const requestTypeDefs = `#graphql
         request: RequestWithPopulatedFields
         avgRating: Float
     }
-    type Driver {
+    type DriverInRequest {
         _id: ID!                    
         userName: String!        
-        avatarURL: String                  
+        avatarURL: String
+        phone: PhoneTypes                 
     }
     type Coordinates {
         start: LocationTypes

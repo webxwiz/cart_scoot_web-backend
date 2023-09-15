@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { basename } from 'path';
 
 import { Router } from "express";
 
@@ -36,9 +37,9 @@ router.delete('/avatar',
     authMiddleware,
     async function (req, res, next) {
         try {
-            const fileName = `avatars/${req.userId}-avatar.webp`;
-            await awsS3Service.deleteImageFromS3(fileName);
             const user = await uploadService.deleteAvatarUrl(req.userId);
+            const fileName = basename(user.avatarURL);
+            await awsS3Service.deleteImageFromS3(fileName);
 
             res.json({
                 user,

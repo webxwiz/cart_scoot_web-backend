@@ -85,6 +85,10 @@ export const userTypeDefs = `#graphql
         message: String
     }       
     
+    input GetFreeDriversInput {
+        requestedDate: Date
+        requestedTime: Date
+    }
     input RegisterUserInput {        
         userName: String!
         email: String!
@@ -129,7 +133,7 @@ export const userTypeDefs = `#graphql
 
     type Query {
         getUserByToken: User        
-        getFreeDrivers(requestedTime: Date): [DriverWithRating]
+        getFreeDrivers(getFreeDriversInput: GetFreeDriversInput): [DriverWithRating]
         getDriverProfile(id: ID!): User   
         getRiderProfile(id: ID!): User
 

@@ -12,8 +12,8 @@ const queryResolver = {
 
             return user;
         },
-        getFreeDrivers: async (parent, { requestedTime }, contextValue) => {
-            const drivers = await userService.getFreeDrivers(requestedTime);
+        getFreeDrivers: async (parent, { getFreeDriversInput }, contextValue) => {
+            const drivers = await userService.getFreeDrivers(getFreeDriversInput);
 
             return drivers;
         },
