@@ -29,9 +29,10 @@ class RequestService {
                 totalCount: { $sum: 1 },
                 avgRating: { $avg: '$rating' },
             });
-        const avgRating = Math.round(driverReviews[0].avgRating * 10) / 10;
+        console.log(driverReviews)
+        const avgRating = Math.round(driverReviews[0]?.avgRating * 10) / 10;
 
-        return { request, avgRating };
+        return { request, avgRating: avgRating ? avgRating : 0 };
     }
 
     async getAllRequestsByFilters(
