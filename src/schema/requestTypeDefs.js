@@ -45,6 +45,10 @@ export const requestTypeDefs = `#graphql
         avatarURL: String
         phone: PhoneTypes                 
     }
+    type PhoneTypes {
+        number: String
+        confirmed: Boolean
+    }
     type Coordinates {
         start: LocationTypes
         end: LocationTypes

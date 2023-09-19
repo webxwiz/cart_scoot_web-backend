@@ -15,7 +15,7 @@ class RequestService {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
-        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
+        const userPopulatedFields = ['_id', 'userName', 'avatarURL', 'phone'];
         const request = await RequestModel.findById(id)
             .populate({ path: 'driverId', select: userPopulatedFields });
         if (!request) {
@@ -29,7 +29,6 @@ class RequestService {
                 totalCount: { $sum: 1 },
                 avgRating: { $avg: '$rating' },
             });
-        console.log(driverReviews)
         const avgRating = Math.round(driverReviews[0]?.avgRating * 10) / 10;
 
         return { request, avgRating: avgRating ? avgRating : 0 };
