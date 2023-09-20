@@ -108,12 +108,11 @@ const mutationResolver = {
         },
 
         createOneDriverRequest: async (parent, { createOneDriverRequestInput }, contextValue) => {
-            const { request, status } = await requestService.createOneDriverRequest(createOneDriverRequestInput, 'RIDER', contextValue.token);
+            const request = await requestService.createOneDriverRequest(createOneDriverRequestInput, 'RIDER', contextValue.token);
 
             return {
                 request,
-                status,
-                message: `Request successfully created. Email successfully sent to ${status.accepted}`,
+                message: `Request successfully created. Email successfully sent`,
             };
         },
 

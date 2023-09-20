@@ -57,12 +57,7 @@ export const requestTypeDefs = `#graphql
         lat: Float
         lon: Float
     }
-    type CreateOneDriverRequestAnswer {
-        request: Request
-        status: String
-        message: String
-    }
-    type CreateAllDriversRequestAnswer {
+    type CreateDriversRequestAnswer {
         request: Request
         message: String
     }
@@ -114,8 +109,8 @@ export const requestTypeDefs = `#graphql
         getFinishedRequestsByDriver(id: ID!): [Request]
     }
     type Mutation {
-        createOneDriverRequest(createOneDriverRequestInput: CreateOneDriverRequestInput): CreateOneDriverRequestAnswer
-        createDriversRequest(createDriversRequestInput: CreateDriversRequestInput): CreateAllDriversRequestAnswer
+        createOneDriverRequest(createOneDriverRequestInput: CreateOneDriverRequestInput): CreateDriversRequestAnswer
+        createDriversRequest(createDriversRequestInput: CreateDriversRequestInput): CreateDriversRequestAnswer
         driverAnswer(driverAnswerInput: AnswerInput): Request
         driverCancel(id: ID!): Request
         riderAnswer(riderAnswerInput: AnswerInput): Request

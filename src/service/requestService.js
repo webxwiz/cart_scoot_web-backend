@@ -77,11 +77,10 @@ class RequestService {
             throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
         }
 
-        let status = {};
         if (number && confirmed) {
-            status = await smsSender('Your private information', number);
+            await smsSender('Your private information', number);
         } else if (email) {
-            status = await mailSender({
+            await mailSender({
                 to: email,
                 subject: 'Car Rent Request',
                 text: 'New car rent request!',
@@ -95,8 +94,8 @@ class RequestService {
                 `,
             });
         }
-
-        return { request, status: status[0].statusCode };
+        
+        return request;
     }
 
     async createDriversRequest({ ...data }, role, token) {
