@@ -138,9 +138,7 @@ class UserService {
         } else return updatedUser;
     }
 
-    async confirmMobilePhone(smsCode, token) {
-        const { _id } = checkAuth(token);
-
+    async confirmMobilePhone(smsCode) {
         const user = await UserModel.findOneAndUpdate(
             {
                 _id,

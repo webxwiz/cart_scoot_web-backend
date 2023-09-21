@@ -50,7 +50,7 @@ const mutationResolver = {
             return user;
         },
         confirmMobilePhone: async (parent, { smsCode }, contextValue) => {
-            const { user, token } = await userService.confirmMobilePhone(smsCode, contextValue.token);
+            const { user, token } = await userService.confirmMobilePhone(smsCode);
 
             return {
                 user,
