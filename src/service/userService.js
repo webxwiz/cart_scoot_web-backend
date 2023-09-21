@@ -159,7 +159,9 @@ class UserService {
         if (!user) {
             throw new GraphQLError("Can't confirm your phone. Try again")
         }
-        return user;
+        const token = generateToken(user._id, user.role);
+
+        return { user, token }
     }
 
     async update(data, token) {
