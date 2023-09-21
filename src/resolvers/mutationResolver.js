@@ -50,13 +50,9 @@ const mutationResolver = {
             return user;
         },
         confirmMobilePhone: async (parent, { smsCode }, contextValue) => {
-            const { user, token } = await userService.confirmMobilePhone(smsCode);
+            const user = await userService.confirmMobilePhone(smsCode, contextValue.token);
 
-            return {
-                user,
-                token,
-                message: `User ${user.phone} successfully confirmed`,
-            };
+            return user;
         },
 
         deleteUser: async (parent, { _id }, contextValue) => {

@@ -150,7 +150,7 @@ export const userTypeDefs = `#graphql
         loginByPhone(loginByPhoneInput: LoginByPhoneInput): UserWithToken
 
         addMobilePhone(phone: String!): User
-        confirmMobilePhone(smsCode: String!): UserWithToken
+        confirmMobilePhone(smsCode: String!): User
 
         changePassword(changePasswordInput: ChangePasswordInput): UserPasswordResponse
         resetPassword(email: String!): UserPasswordResponse

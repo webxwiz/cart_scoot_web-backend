@@ -138,7 +138,9 @@ class UserService {
         } else return updatedUser;
     }
 
-    async confirmMobilePhone(smsCode) {
+    async confirmMobilePhone(smsCode, token) {
+        const { _id } = checkAuth(token);
+
         const user = await UserModel.findOneAndUpdate(
             {
                 _id,
@@ -157,9 +159,8 @@ class UserService {
         if (!user) {
             throw new GraphQLError("Can't confirm your phone. Try again")
         }
-        const token = generateToken(user._id, user.role);
 
-        return { user, token }
+        return user;
     }
 
     async update(data, token) {
