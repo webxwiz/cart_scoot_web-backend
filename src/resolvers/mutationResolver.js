@@ -31,7 +31,7 @@ const mutationResolver = {
 
             return {
                 user,
-                message: `User ${user.phone} successfully created`,
+                message: `User ${user.phone.number} successfully created`,
             };
         },
         loginByPhone: async (parent, { loginByPhoneInput }) => {
@@ -122,35 +122,30 @@ const mutationResolver = {
             return { request, message };
         },
 
-        driverAnswer: async (parent, { AnswerInput }, contextValue) => {
-            const { id, answer } = AnswerInput;
-            const status = answer ? 'APPROVED' : 'REJECTED';
-            const request = await requestService.userAnswer(id, status, 'DRIVER', contextValue.token);
+        driverOneCallAnswer: async (parent, { driverOneCallAnswerInput }, contextValue) => {
+            const request = await requestService.driverOneCallAnswer(driverOneCallAnswerInput, contextValue.token);
+
+            return request;
+        },
+        driverMultiCallAnswer: async (parent, { driverMultiCallAnswerInput }, contextValue) => {
+            const request = await requestService.driverMultiCallAnswer(driverMultiCallAnswerInput, contextValue.token);
 
             return request;
         },
 
-        riderAnswer: async (parent, { AnswerInput }, contextValue) => {
-            const { id, answer } = AnswerInput;
-            const status = answer ? 'ACTIVE' : 'REJECTED';
-            const request = await requestService.userAnswer(id, status, 'RIDER', contextValue.token);
-
-            return request;
-        },
-        driverCancel: async (parent, { id }, contextValue) => {
-            const request = await requestService.userAnswer(id, 'REJECTED', contextValue.token);
+        riderMultiCallAnswer: async (parent, { riderMultiCallAnswerInput }, contextValue) => {
+            const request = await requestService.riderMultiCallAnswer(riderMultiCallAnswerInput, contextValue.token);
 
             return request;
         },
 
-        cancelUserRequest: async (parent, { id }, contextValue) => {
-            const requestStatus = await requestService.cancelUserRequest(id, 'RIDER', contextValue.token);
+        cancelRequest: async (parent, { requestId }, contextValue) => {
+            const requestStatus = await requestService.changeRequestStatus(requestId, "REJECTED", contextValue.token);
 
             return requestStatus;
         },
-
-        finishRequest: async (parent, { id }, contextValue) => {
-            const request = await requestService.finishRequest(id, 'RIDER', contextValue.token);
+        finishRequest: async (parent, { requestId }, contextValue) => {
+            const request = await requestService.changeRequestStatus(requestId, "FINISHED", contextValue.token);
 
             return request;
         },

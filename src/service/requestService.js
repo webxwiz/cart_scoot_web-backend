@@ -21,17 +21,21 @@ class RequestService {
         if (!request) {
             throw new GraphQLError("Can't find request")
         };
+
         const driverReviews = await ReviewModel
             .aggregate()
-            .match({ driverId: request.driverId._id })
+            .match({ driverId: request.driverId?._id })
             .group({
                 _id: '$driverId',
                 totalCount: { $sum: 1 },
                 avgRating: { $avg: '$rating' },
             });
-        const avgRating = Math.round(driverReviews[0]?.avgRating * 10) / 10;
+        let avgRating;
+        driverReviews?.length === 0
+            ? avgRating = 0
+            : avgRating = Math.round(driverReviews[0]?.avgRating * 10) / 10;
 
-        return { request, avgRating: avgRating ? avgRating : 0 };
+        return { request, avgRating };
     }
 
     async getAllRequestsByFilters(
@@ -78,7 +82,7 @@ class RequestService {
         }
 
         if (number && confirmed) {
-            await smsSender('Your private information', number);
+            await smsSender(`Your have new request ${request.requestCode}`, number);
         } else if (email) {
             await mailSender({
                 to: email,
@@ -86,7 +90,7 @@ class RequestService {
                 text: 'New car rent request!',
                 html: `
                     <h2>Hello!</h2>
-                    <h2>You have new car rent request!</h2>
+                    <h2>You have new car rent request ${request.requestCode}!</h2>
                     <h4>Please, follow the link for more details</h4>
                     <hr/>
                     <br/>
@@ -94,14 +98,15 @@ class RequestService {
                 `,
             });
         }
-        
+
         return request;
     }
 
-    async createDriversRequest({ ...data }, role, token) {
+    async createDriversRequest(data, role, token) {
         const { _id } = checkAuth(token);
         await findUserByIdAndRole(_id, role);
 
+        const { requestedTime } = data;
         const dayOfWeek = new Date(requestedTime).getDay();
         const hour = new Date(requestedTime).getHours();
 
@@ -110,8 +115,8 @@ class RequestService {
             'workingTime.from': { $lte: hour },
             'workingTime.to': { $gt: hour },
         });
-        const driverEmails = driverArray.map(user => user.email).filter(email => email !== null);
-        const driverPhones = driverArray.map(user => user.phone.number).filter(item => item !== null);
+        const driverEmails = driverArray.map(user => user.email).filter(phone => phone !== undefined || null);
+        const driverPhones = driverArray.map(user => user.phone?.number).filter(phone => phone !== undefined || null);
 
         const firstPart = crypto.randomBytes(3).toString('hex');
         const secondPart = crypto.randomBytes(2).toString('hex');
@@ -120,35 +125,38 @@ class RequestService {
 
         const request = await RequestModel.create({
             userId: _id,
-            driverId: id,
             status: 'PENDING',
             requestCode,
             ...data
         });
 
         let smsStatuses = [];
-        for (const number of driverPhones) {
-            const status = await smsSender('Your private information', number);
-            smsStatuses.push(status);
+        if (driverPhones.length) {
+            for (const number of driverPhones) {
+                const status = await smsSender(`Your have common request ${request.requestCode}`, number);
+                smsStatuses.push(status);
+            }
         }
 
         let emailStatuses = [];
-        for (const email of driverEmails) {
-            const status = await mailSender({
-                to: email,
-                subject: 'Car Rent Request',
-                text: 'New car rent request!',
-                html: `
-                    <h2>Hello!</h2>
-                    <h2>You have new car rent request!</h2>
-                    <h4>Please, follow the link for more details</h4>
-                    <hr/>
-                    <br/>
-                    <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
-                `,
-            });
-            emailStatuses.push(status[0].statusCode);
-        };
+        if (driverEmails.length) {
+            for (const email of driverEmails) {
+                const status = await mailSender({
+                    to: email,
+                    subject: 'Car Rent Request',
+                    text: 'New car rent request!',
+                    html: `
+                        <h2>Hello!</h2>
+                        <h2>Your have common request ${request.requestCode}!</h2>
+                        <h4>Please, follow the link for more details</h4>
+                        <hr/>
+                        <br/>
+                        <a href='${process.env.FRONT_URL}/requestsList'>Link for details</a>
+                    `,
+                });
+                emailStatuses.push(status[0].statusCode);
+            };
+        }
         const successEmailsCount = emailStatuses.map(item => item === 202);
 
         const totalDrivers = smsStatuses.length + successEmailsCount.length;
@@ -159,25 +167,14 @@ class RequestService {
         }
     }
 
-    async userAnswer(id, status, role, token) {
+    async driverOneCallAnswer({ requestId, answer }, token) {
         const { _id } = checkAuth(token);
-        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
+        await findUserByIdAndRole(_id, 'DRIVER');
 
-        if (number && confirmed) {
-            await smsSender('Your private information', number);
-        } else if (email) {
-            await mailSender({
-                to: email,
-                subject: 'Your subject',
-                text: 'Your text',
-                html: `
-                    <h2>Your HTML</h2>                        
-                `,
-            });
-        }
+        const status = answer ? 'ACTIVE' : 'REJECTED';
 
         const request = await RequestModel.findOneAndUpdate(
-            { _id: id },
+            { _id: requestId },
             {
                 $set: { status }
             },
@@ -185,58 +182,129 @@ class RequestService {
         )
         if (!request) {
             throw new GraphQLError("Modified forbidden")
-        } else return request;
-    }
+        }
 
-    async cancelUserRequest(id, role, token) {
-        const { _id } = checkAuth(token);
-        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
-
+        const { email, phone: { number, confirmed } } = await findUserById(request.userId)
         if (number && confirmed) {
-            await smsSender('Your private information', number);
+            await smsSender(`Your request ${request.requestCode} has been ${status ? 'approved' : 'rejected'}`, number);
         } else if (email) {
             await mailSender({
                 to: email,
-                subject: 'Your subject',
-                text: 'Your text',
+                subject: 'Request answer',
+                text: `Your request ${request.requestCode} has been ${status ? 'approved' : 'rejected'}`,
                 html: `
-                    <h2>Your HTML</h2>                        
+                    <h2>Your request ${request.requestCode} has been ${status ? 'approved' : 'rejected'}</h2>                        
                 `,
             });
         }
 
-        const requestStatus = await RequestModel.deleteOne({ _id: id });
-
-        return requestStatus;
+        return request;
     }
 
-    async finishRequest(id, role, token) {
+    async driverMultiCallAnswer({ requestId, answer }, token) {
         const { _id } = checkAuth(token);
-        const { email, phone: { number, confirmed } } = await findUserByIdAndRole(_id, role);
+        await findUserByIdAndRole(_id, 'DRIVER');
 
-        if (number && confirmed) {
-            await smsSender('Your private information', number);
-        } else if (email) {
-            await mailSender({
-                to: email,
-                subject: 'Your subject',
-                text: 'Your text',
-                html: `
-                    <h2>Your HTML</h2>                        
-                `,
-            });
-        }
+        const status = answer ? 'APPROVED' : 'REJECTED';
 
         const request = await RequestModel.findOneAndUpdate(
-            { _id: id },
+            { _id: requestId },
             {
-                $set: { status: "FINISHED" }
+                $set: { status, driverId: _id }
+            },
+            { new: true },
+        );
+        if (!request) throw new GraphQLError("Modified forbidden");
+
+        const { email, phone: { number, confirmed } } = await findUserById(request.userId);
+
+        if (number && confirmed) {
+            await smsSender(`Your request ${request.requestCode} has been ${answer ? 'approved' : 'rejected'}`, number);
+        } else if (email) {
+            await mailSender({
+                to: email,
+                subject: 'Request status',
+                text: `Your request ${request.requestCode} has been ${answer ? 'approved' : 'rejected'}`,
+                html: `
+                        <h2>Your request ${request.requestCode} has been ${answer ? 'approved' : 'rejected'}</h2>                        
+                    `,
+            });
+        }
+        return request;
+    }
+
+    async riderMultiCallAnswer({ requestId, answer }, token) {
+        const { _id } = checkAuth(token);
+        await findUserByIdAndRole(_id, 'RIDER');
+
+        let request;
+        if (answer) {
+            request = await RequestModel.findOneAndUpdate(
+                { _id: requestId },
+                {
+                    $set: { status: 'ACTIVE' }
+                },
+                { new: true },
+            );
+        } else {
+            request = await RequestModel.findOneAndUpdate(
+                { _id: requestId },
+                {
+                    $set: { status: 'PENDING', driverId: null }
+                },
+                { new: false },
+            );
+        }
+        if (!request) throw new GraphQLError("Modified forbidden");
+
+        const { email, phone: { number, confirmed } } = await findUserById(request.driverId);
+
+        if (number && confirmed) {
+            await smsSender(`The request ${request.requestCode} has been ${answer ? 'approved' : 'rejected'}`, number);
+        } else if (email) {
+            await mailSender({
+                to: email,
+                subject: 'Request status',
+                text: `The request ${request.requestCode} has been ${answer ? 'approved' : 'rejected'}`,
+                html: `
+                        <h2>The request ${request.requestCode} has been ${answer ? 'approved' : 'rejected'}</h2>                        
+                    `,
+            });
+        }
+        return request;
+    }
+
+    async changeRequestStatus(requestId, status, token) {
+        const { _id } = checkAuth(token);
+        await findUserByIdAndRole(_id, 'RIDER');
+
+        const request = await RequestModel.findOneAndUpdate(
+            { _id: requestId },
+            {
+                $set: { status }
             },
             { new: true },
         )
         if (!request) {
             throw new GraphQLError("Modified forbidden")
-        } else return request;
+        }
+
+        const { email, phone: { number, confirmed } } = await findUserById(request.driverId);
+
+        if (number && confirmed) {
+            await smsSender(`The request ${request.requestCode} has status ${status}`, number);
+        } else if (email) {
+            await mailSender({
+                to: email,
+                subject: 'Request status',
+                text: `The request ${request.requestCode} has status ${status}`,
+                html: `
+                    <h2>The request ${request.requestCode} has status ${status}</h2>                        
+                `,
+            });
+        }
+
+        return request;
     }
 
     async finishedRequestByDriver(id, token) {

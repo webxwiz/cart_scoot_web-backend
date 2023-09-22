@@ -11,7 +11,7 @@ export const requestTypeDefs = `#graphql
         _id: ID
         createdAt: Date
         userId: ID!
-        driverId: ID!
+        driverId: ID
         description: String
         status: statusTypes
         carType: Int
@@ -87,7 +87,7 @@ export const requestTypeDefs = `#graphql
         dropoffLocation: String
     } 
     input AnswerInput {
-        id: ID!
+        requestId: ID!
         answer: Boolean!
     }
     input CoordinatesInput {
@@ -111,10 +111,13 @@ export const requestTypeDefs = `#graphql
     type Mutation {
         createOneDriverRequest(createOneDriverRequestInput: CreateOneDriverRequestInput): CreateDriversRequestAnswer
         createDriversRequest(createDriversRequestInput: CreateDriversRequestInput): CreateDriversRequestAnswer
-        driverAnswer(driverAnswerInput: AnswerInput): Request
-        driverCancel(id: ID!): Request
-        riderAnswer(riderAnswerInput: AnswerInput): Request
-        cancelUserRequest(id: ID!): Boolean
-        finishRequest(id: ID!): Request
+
+        driverOneCallAnswer(driverOneCallAnswerInput: AnswerInput): Request
+        driverMultiCallAnswer(driverMultiCallAnswerInput: AnswerInput): Request
+
+        riderMultiCallAnswer(riderMultiCallAnswerInput: AnswerInput): Request
+
+        cancelRequest(requestId: ID!): Request
+        finishRequest(requestId: ID!): Request
     }    
 `;

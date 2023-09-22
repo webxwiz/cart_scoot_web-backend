@@ -10,7 +10,6 @@ const requestSchema = new Schema({
     driverId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
     },
     description: String,
     status: {
