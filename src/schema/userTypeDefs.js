@@ -86,7 +86,6 @@ export const userTypeDefs = `#graphql
     }       
     
     input GetFreeDriversInput {
-        requestedDate: Date
         requestedTime: Date
     }
     input RegisterUserInput {        

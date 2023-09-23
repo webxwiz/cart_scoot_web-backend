@@ -272,23 +272,17 @@ class UserService {
         }
     }
 
-    async getFreeDrivers({ requestedTime, requestedDate }) {
-
-        const dayOfWeek = new Date(requestedDate).getDay();
-        const hour = new Date(requestedTime).getHours();
-
+    async getFreeDrivers({ requestedTime }) {
+        
         let drivers;
         if (requestedTime) {
+            const dayOfWeek = new Date(requestedTime).getDay();
+            const hour = new Date(requestedTime).getHours();
             drivers = await UserModel.find({
                 workingDays: { $in: dayOfWeek },
                 'workingTime.from': { $lte: hour },
                 'workingTime.to': { $gt: hour },
                 role: 'DRIVER',
-            });
-        } else if (requestedDate) {
-            drivers = await UserModel.find({
-                workingDays: { $in: dayOfWeek },
-                role: 'DRIVER'
             });
         } else {
             drivers = await UserModel.find({ role: 'DRIVER' });
