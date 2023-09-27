@@ -28,8 +28,8 @@ const queryResolver = {
             return rider;
         },
 
-        getReviewsByDriverId: async (parent, { driverId }, contextValue) => {
-            const reviews = await reviewService.getReviewsByDriverId(driverId);
+        getReviewsByDriverId: async (parent, { getReviewsByDriverIdInput }, contextValue) => {
+            const reviews = await reviewService.getReviewsByDriverId(getReviewsByDriverIdInput);
 
             return reviews;
         },

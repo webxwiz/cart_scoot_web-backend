@@ -37,9 +37,20 @@ class ReviewService {
         return review;
     }
 
-    async getReviewsByDriverId(driverId) {
+    async getReviewsByDriverId(
+        { page, searchRequestCode, dateFrom, dateTo, driverId }) {
+
+        const validPage = page ? page > 0 ? page : 1 : 1;
         const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
-        const reviews = await ReviewModel.find({ driverId })
+
+        const reviews = await ReviewModel.find
+            ({
+                driverId,
+                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
+                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+            })
+            .limit(6 * validPage)
+            .sort({ createdAt: -1 })
             .populate({ path: 'createdBy', select: userPopulatedFields })
             .populate({ path: 'driverId', select: userPopulatedFields });
 
@@ -47,8 +58,10 @@ class ReviewService {
     }
 
     async getAllReviews(pageNumber) {
+
         const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
         const reviewsOnPage = 50;
+
         const reviews = await ReviewModel.find()
             .sort({ createdAt: -1 })
             .limit(reviewsOnPage)

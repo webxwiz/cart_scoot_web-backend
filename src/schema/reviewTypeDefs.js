@@ -28,6 +28,13 @@ export const reviewTypeDefs = `#graphql
         avgRating: Float
     }   
 
+    input GetReviewsByDriverIdInput {
+        driverId: ID!
+        page: Int
+        searchRequestCode: String
+        dateFrom: Date
+        dateTo: Date
+    }
     input AddReviewInput {
         driverId: ID!
         text: String
@@ -37,7 +44,7 @@ export const reviewTypeDefs = `#graphql
     
     type Query {
         getAllReviews(pageNumber: Int): [Review]
-        getReviewsByDriverId(driverId: ID!): [ReviewWithPopulatedFields] 
+        getReviewsByDriverId(getReviewsByDriverIdInput: GetReviewsByDriverIdInput): [ReviewWithPopulatedFields] 
         getDriverRating: RatingResult       
     }
     type Mutation {
