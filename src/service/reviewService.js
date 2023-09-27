@@ -37,7 +37,7 @@ class ReviewService {
         return review;
     }
 
-    async getReviewsById(driverId) {
+    async getReviewsByDriverId(driverId) {
         const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
         const reviews = await ReviewModel.find({ driverId })
             .populate({ path: 'createdBy', select: userPopulatedFields })

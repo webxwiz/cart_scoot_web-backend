@@ -37,7 +37,7 @@ export const reviewTypeDefs = `#graphql
     
     type Query {
         getAllReviews(pageNumber: Int): [Review]
-        getReviewsById(driverId: ID!): [ReviewWithPopulatedFields] 
+        getReviewsByDriverId(driverId: ID!): [ReviewWithPopulatedFields] 
         getDriverRating: RatingResult       
     }
     type Mutation {
