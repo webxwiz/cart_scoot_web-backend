@@ -22,6 +22,10 @@ export const reviewTypeDefs = `#graphql
         _id: ID
         userName: String
         avatarURL: String
+    }
+    type RatingResult {
+        totalCount: Int
+        avgRating: Float
     }   
 
     input AddReviewInput {
@@ -33,7 +37,8 @@ export const reviewTypeDefs = `#graphql
     
     type Query {
         getAllReviews(pageNumber: Int): [Review]
-        getReviewsById(driverId: ID!): [ReviewWithPopulatedFields]        
+        getReviewsById(driverId: ID!): [ReviewWithPopulatedFields] 
+        getDriverRating: RatingResult       
     }
     type Mutation {
         addReview(addReviewInput: AddReviewInput): Review        

@@ -38,6 +38,11 @@ const queryResolver = {
 
             return reviews;
         },
+        getDriverRating: async (parent, args, contextValue) => {
+            const { avgRating, totalCount } = await reviewService.getDriverRating(contextValue.token);
+
+            return { avgRating, totalCount };
+        },
 
         getRequest: async (parent, { id }, contextValue) => {
             const { request, avgRating } = await requestService.getRequest(id, contextValue.token);

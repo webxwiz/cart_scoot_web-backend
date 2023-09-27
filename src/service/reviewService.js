@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 import ReviewModel from '../models/Review.js';
 
 import { checkAuth, findUserById, findUserByIdAndRole, smsSender, mailSender, logger } from '../utils/_index.js';
@@ -53,6 +55,28 @@ class ReviewService {
             .skip((validatePageNumber - 1) * reviewsOnPage);;
 
         return reviews;
+    }
+
+    async getDriverRating(token) {
+        const { _id } = checkAuth(token);
+
+        const driverReviews = await ReviewModel
+            .aggregate()
+            .match({ driverId: new Types.ObjectId(_id) })
+            .group({
+                _id: '$driverId',
+                totalCount: { $sum: 1 },
+                avgRating: { $avg: '$rating' },
+            });
+
+        let avgRating = 0;
+        let totalCount = 0;
+        if (driverReviews?.length) {
+            avgRating = Math.round(driverReviews[0]?.avgRating * 10) / 10;
+            totalCount = driverReviews[0].totalCount;
+        }
+
+        return { totalCount, avgRating };
     }
 }
 
