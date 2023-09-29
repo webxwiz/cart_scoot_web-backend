@@ -49,8 +49,13 @@ const queryResolver = {
 
             return { request, avgRating };
         },
-        getAllRequestsByFilters: async (parent, { getAllRequestsByFiltersInput }, contextValue) => {
-            const requests = await requestService.getAllRequestsByFilters(getAllRequestsByFiltersInput, contextValue.token);
+        getRequestsByRider: async (parent, { getRequestsByFiltersInput }, contextValue) => {
+            const requests = await requestService.getRequestsByRider(getRequestsByFiltersInput, contextValue.token);
+
+            return requests;
+        },
+        getRequestsByDriver: async (parent, { getRequestsByFiltersInput }, contextValue) => {
+            const requests = await requestService.getRequestsByDriver(getRequestsByFiltersInput, contextValue.token);
 
             return requests;
         },

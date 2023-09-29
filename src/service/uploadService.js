@@ -41,7 +41,7 @@ class UploadService {
             { _id },
             {
                 $push: { 'license.url': licenseURL },
-                $set: { 'license.status': 'PENDING' }
+                $set: { 'license.status': 'WAITING' }
             },
             { new: true },
         );

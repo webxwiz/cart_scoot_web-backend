@@ -21,11 +21,25 @@ export const requestTypeDefs = `#graphql
         pickupLocation: String
         dropoffLocation: String
     }
-    type RequestWithPopulatedFields {
+    type RequestWithDriverPopulatedFields {
         _id: ID
         createdAt: Date
         userId: ID!
-        driverId: DriverInRequest
+        driverId: UserInRequest
+        description: String
+        status: statusTypes
+        carType: Int
+        requestedTime: Date
+        coordinates: Coordinates
+        requestCode: String
+        pickupLocation: String
+        dropoffLocation: String
+    }
+    type RequestWithRiderPopulatedFields {
+        _id: ID
+        createdAt: Date
+        userId: UserInRequest
+        driverId: ID
         description: String
         status: statusTypes
         carType: Int
@@ -36,10 +50,10 @@ export const requestTypeDefs = `#graphql
         dropoffLocation: String
     }
     type RequestWithRating {
-        request: RequestWithPopulatedFields
+        request: RequestWithDriverPopulatedFields
         avgRating: Float
     }
-    type DriverInRequest {
+    type UserInRequest {
         _id: ID!                    
         userName: String!        
         avatarURL: String
@@ -62,7 +76,7 @@ export const requestTypeDefs = `#graphql
         message: String
     }
 
-    input GetAllRequestsByFiltersInput {
+    input GetRequestsByFiltersInput {
         status: statusTypes
         page: Int
         searchRequestCode: String
@@ -101,8 +115,9 @@ export const requestTypeDefs = `#graphql
 
     type Query {
         getRequest(id: ID!): RequestWithRating
+        getRequestsByRider(getRequestsByFiltersInput: GetRequestsByFiltersInput): [RequestWithDriverPopulatedFields] 
+        getRequestsByDriver(getRequestsByFiltersInput: GetRequestsByFiltersInput): [RequestWithRiderPopulatedFields] 
         getAllRequests: [Request]
-        getAllRequestsByFilters(getAllRequestsByFiltersInput: GetAllRequestsByFiltersInput): [RequestWithPopulatedFields] 
         getAllActiveRequests: [Request]
         getAllFinishedRequests: [Request]
         getNotFinishedRequests: [Request]

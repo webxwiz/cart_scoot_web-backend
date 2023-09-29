@@ -38,7 +38,7 @@ class RequestService {
         return { request, avgRating };
     }
 
-    async getAllRequestsByFilters(
+    async getRequestsByRider(
         { status, page, searchRequestCode, dateFrom, dateTo }, token) {
         const { _id } = checkAuth(token);
         await findUserById(_id);
@@ -55,6 +55,27 @@ class RequestService {
             .limit(6 * validPage)
             .sort({ createdAt: -1 })
             .populate({ path: 'driverId', select: userPopulatedFields });
+
+        return requests;
+    }
+
+    async getRequestsByDriver(
+        { status, page, searchRequestCode, dateFrom, dateTo }, token) {
+        const { _id } = checkAuth(token);
+        await findUserById(_id);
+
+        const validPage = page ? page > 0 ? page : 1 : 1;
+        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
+        const requests = await RequestModel.find
+            ({
+                driverId: _id,
+                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
+                ...(status && { status }),
+                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+            })
+            .limit(6 * validPage)
+            .sort({ createdAt: -1 })
+            .populate({ path: 'userId', select: userPopulatedFields });
 
         return requests;
     }
