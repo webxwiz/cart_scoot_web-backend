@@ -45,7 +45,7 @@ class UserService {
         const candidate = await UserModel.findOne({ 'phone.number': phone });
         if (candidate) {
             const updatedUser = await UserModel.findOneAndUpdate(
-                { _id: candidate._id },
+                { _id: candidate._id, userName: "" },
                 {
                     $set: { phoneCode }
                 },
@@ -58,6 +58,7 @@ class UserService {
             const user = await UserModel.create({
                 'phone.number': phone,
                 phoneCode,
+                userName: "",
             });
 
             if (!user) {

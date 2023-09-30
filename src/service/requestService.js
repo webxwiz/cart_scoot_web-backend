@@ -348,7 +348,9 @@ class RequestService {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
-        const requests = await RequestModel.find({ status });
+        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
+        const requests = await RequestModel.find({ status })
+            .populate({ path: 'userId', select: userPopulatedFields });
 
         return requests;
     }

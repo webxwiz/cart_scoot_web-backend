@@ -118,7 +118,8 @@ export const requestTypeDefs = `#graphql
         getRequestsByRider(getRequestsByFiltersInput: GetRequestsByFiltersInput): [RequestWithDriverPopulatedFields] 
         getRequestsByDriver(getRequestsByFiltersInput: GetRequestsByFiltersInput): [RequestWithRiderPopulatedFields] 
         getAllRequests: [Request]
-        getAllActiveRequests: [Request]
+        getPendingRequests: [RequestWithRiderPopulatedFields]
+
         getAllFinishedRequests: [Request]
         getNotFinishedRequests: [Request]
         getFinishedRequestsByDriver(id: ID!): [Request]

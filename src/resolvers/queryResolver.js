@@ -59,8 +59,8 @@ const queryResolver = {
 
             return requests;
         },
-        getAllActiveRequests: async (parent, args, contextValue) => {
-            const requests = await requestService.getAllRequestsByStatus('ACTIVE', contextValue.token);
+        getPendingRequests: async (parent, args, contextValue) => {
+            const requests = await requestService.getAllRequestsByStatus('PENDING', contextValue.token);
 
             return requests;
         },
