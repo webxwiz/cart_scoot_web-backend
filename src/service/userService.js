@@ -40,7 +40,7 @@ class UserService {
         }
     }
 
-    async registerByPhone({ phone, userName }) {
+    async registerByPhone({ phone, userName, role }) {
         const phoneCode = await this.sendSmsToPhone(phone);
         const candidate = await UserModel.findOne({ 'phone.number': phone });
         if (candidate) {
@@ -59,6 +59,7 @@ class UserService {
                 'phone.number': phone,
                 phoneCode,
                 userName,
+                role,
             });
 
             if (!user) {

@@ -97,6 +97,7 @@ export const userTypeDefs = `#graphql
     input RegisterByPhoneInput {
         phone: String!
         userName: String
+        role: RoleTypes
     }
     input LoginByPhoneInput {
         phone: String!
