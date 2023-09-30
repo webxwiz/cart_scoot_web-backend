@@ -40,12 +40,12 @@ class UserService {
         }
     }
 
-    async registerByPhone(phone) {
+    async registerByPhone({ phone, userName }) {
         const phoneCode = await this.sendSmsToPhone(phone);
         const candidate = await UserModel.findOne({ 'phone.number': phone });
         if (candidate) {
             const updatedUser = await UserModel.findOneAndUpdate(
-                { _id: candidate._id, userName: "" },
+                { _id: candidate._id },
                 {
                     $set: { phoneCode }
                 },
@@ -58,7 +58,7 @@ class UserService {
             const user = await UserModel.create({
                 'phone.number': phone,
                 phoneCode,
-                userName: "",
+                userName,
             });
 
             if (!user) {
@@ -73,7 +73,6 @@ class UserService {
                 'phone.number': phone,
                 'phoneCode.code': smsCode,
                 'phoneCode.expire': { $gt: Date.now() },
-                role: 'RIDER',
             },
         );
         if (!user) {
@@ -125,6 +124,14 @@ class UserService {
     async addMobilePhone(phone, token) {
         const { _id } = checkAuth(token);
         await findUserById(_id);
+
+        const user = await UserModel.findOne({ 'phone.number': phone });
+        if (user?.phone.number === phone) {
+            throw new GraphQLError("You already add mobile phone", { extensions: { code: 'BAD_USER_INPUT' } })
+        }
+        if (user) {
+            throw new GraphQLError("This mobile phone already exist!", { extensions: { code: 'BAD_USER_INPUT' } })
+        }
 
         const phoneCode = await this.sendSmsToPhone(phone);
         const updatedUser = await UserModel.findOneAndUpdate(
@@ -274,7 +281,7 @@ class UserService {
     }
 
     async getFreeDrivers({ requestedTime }) {
-        
+
         let drivers;
         if (requestedTime) {
             const dayOfWeek = new Date(requestedTime).getDay();

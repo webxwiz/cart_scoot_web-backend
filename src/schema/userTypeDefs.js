@@ -94,6 +94,10 @@ export const userTypeDefs = `#graphql
         password: String!
         role: RoleTypes               
     }
+    input RegisterByPhoneInput {
+        phone: String!
+        userName: String
+    }
     input LoginByPhoneInput {
         phone: String!
         smsCode: String!
@@ -105,6 +109,9 @@ export const userTypeDefs = `#graphql
     input UserSetPasswordInput {
         token: String!
         password: String!
+    }
+    input ChangeUserNameInput {
+        userName: String!
     }
     input UpdateWorkingTimeInput {
         workingDays: [Int]
@@ -145,7 +152,7 @@ export const userTypeDefs = `#graphql
         registerByEmail(registerUserInput: RegisterUserInput): UserWithToken        
         loginByEmail(email: String!, password: String!): UserWithToken
 
-        registerByPhone(phone: String!): UserWithMessage        
+        registerByPhone(registerByPhoneInput: RegisterByPhoneInput): UserWithMessage        
         loginByPhone(loginByPhoneInput: LoginByPhoneInput): UserWithToken
 
         addMobilePhone(phone: String!): User
@@ -155,6 +162,7 @@ export const userTypeDefs = `#graphql
         resetPassword(email: String!): UserPasswordResponse
         setNewPassword(setPasswordInput: UserSetPasswordInput): UserPasswordResponse
 
+        changeUserName(changeUserNameInput: ChangeUserNameInput): User
         deleteUser(_id: ID!): UserDeleteResponse
         updateWorkingTime(updateWorkingTimeInput: UpdateWorkingTimeInput): User
         sendLicenseForApprove: User

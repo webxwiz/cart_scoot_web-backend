@@ -63,6 +63,11 @@ const mutationResolver = {
                 message: 'User successfully deleted'
             };
         },
+        changeUserName: async (parent, { changeUserNameInput }, contextValue) => {
+            const user = await userService.update(changeUserNameInput, contextValue.token);
+
+            return user;
+        },
 
         resetPassword: async (parent, { email }) => {
             const status = await userService.resetPassword(email);
