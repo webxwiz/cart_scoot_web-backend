@@ -26,6 +26,14 @@ const mutationResolver = {
             };
         },
 
+        fullRegisterByPhone: async (parent, { fullRegisterByPhoneInput }) => {
+            const user = await userService.fullRegisterByPhone(fullRegisterByPhoneInput);
+
+            return {
+                user,
+                message: `User ${user.phone.number} successfully created`,
+            };
+        },
         registerByPhone: async (parent, { registerByPhoneInput }) => {
             const user = await userService.registerByPhone(registerByPhoneInput);
 

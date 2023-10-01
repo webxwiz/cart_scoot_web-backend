@@ -40,7 +40,28 @@ class UserService {
         }
     }
 
-    async registerByPhone({ phone, userName, role }) {
+    async fullRegisterByPhone({ phone, userName, role }) {
+        const candidate = await UserModel.findOne({ 'phone.number': phone });
+        if (candidate) {
+            throw new GraphQLError(`User ${phone} already exist. Please login`, { extensions: { code: 'BAD_USER_INPUT' } })
+        }
+
+        const phoneCode = await this.sendSmsToPhone(phone);
+
+        const user = await UserModel.create({
+            'phone.number': phone,
+            phoneCode,
+            userName,
+            role,
+        });
+        if (!user) {
+            throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
+        }
+        
+        return user;
+    }
+
+    async registerByPhone({ phone, userName }) {
         const phoneCode = await this.sendSmsToPhone(phone);
         const candidate = await UserModel.findOne({ 'phone.number': phone });
         if (candidate) {
@@ -59,7 +80,6 @@ class UserService {
                 'phone.number': phone,
                 phoneCode,
                 userName,
-                role,
             });
 
             if (!user) {
@@ -90,7 +110,7 @@ class UserService {
         const { email, password } = data;
         const candidate = await UserModel.findOne({ email });
         if (candidate) {
-            throw new GraphQLError(`User ${email} already exist`, { extensions: { code: 'BAD_USER_INPUT' } })
+            throw new GraphQLError(`User ${email} already exist. Please login`, { extensions: { code: 'BAD_USER_INPUT' } })
         }
         const passwordHash = await createPasswordHash(password);
         const user = await UserModel.create({

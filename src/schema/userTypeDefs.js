@@ -97,6 +97,10 @@ export const userTypeDefs = `#graphql
     input RegisterByPhoneInput {
         phone: String!
         userName: String
+    }
+    input FullRegisterByPhoneInput {
+        phone: String!
+        userName: String
         role: RoleTypes
     }
     input LoginByPhoneInput {
@@ -153,6 +157,7 @@ export const userTypeDefs = `#graphql
         registerByEmail(registerUserInput: RegisterUserInput): UserWithToken        
         loginByEmail(email: String!, password: String!): UserWithToken
 
+        fullRegisterByPhone(fullRegisterByPhoneInput: FullRegisterByPhoneInput): UserWithMessage
         registerByPhone(registerByPhoneInput: RegisterByPhoneInput): UserWithMessage        
         loginByPhone(loginByPhoneInput: LoginByPhoneInput): UserWithToken
 
