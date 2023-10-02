@@ -17,7 +17,8 @@ class RequestService {
 
         const userPopulatedFields = ['_id', 'userName', 'avatarURL', 'phone'];
         const request = await RequestModel.findById(id)
-            .populate({ path: 'driverId', select: userPopulatedFields });
+            .populate({ path: 'driverId', select: userPopulatedFields })
+            .populate({ path: 'userId', select: userPopulatedFields });
         if (!request) {
             throw new GraphQLError("Can't find request")
         };

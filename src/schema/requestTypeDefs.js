@@ -49,8 +49,22 @@ export const requestTypeDefs = `#graphql
         pickupLocation: String
         dropoffLocation: String
     }
+    type RequestWithAllUserPopulatedFields {
+        _id: ID
+        createdAt: Date
+        userId: UserInRequest
+        driverId: UserInRequest
+        description: String
+        status: statusTypes
+        carType: Int
+        requestedTime: Date
+        coordinates: Coordinates
+        requestCode: String
+        pickupLocation: String
+        dropoffLocation: String
+    }
     type RequestWithRating {
-        request: RequestWithDriverPopulatedFields
+        request: RequestWithAllUserPopulatedFields
         avgRating: Float
     }
     type UserInRequest {
