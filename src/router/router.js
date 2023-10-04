@@ -58,6 +58,12 @@ router.post('/license',
     ]),
     async function (req, res, next) {
         try {
+            const { imageKeyList } = await uploadService.deleteLicenseUrl(req.userId);
+            for (const key of imageKeyList) {
+                const result = await awsS3Service.deleteImageFromS3(`licenses/${key}`);
+                deleteMarker.push(result.DeleteMarker);
+            }
+
             const licenseURL = [];
             for (const image of req.files.license) {
                 const fileName = (`licenses/${req.userId}-${crypto.randomBytes(4).toString('hex')}.webp`);
