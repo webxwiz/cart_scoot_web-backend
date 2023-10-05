@@ -303,11 +303,11 @@ class UserService {
         let drivers;
         if (requestedTime) {
             const dayOfWeek = new Date(requestedTime).getDay();
-            const hour = new Date(requestedTime).getHours();
+            const time = +`${requestedTime.getHours()}.${requestedTime.getMinutes()}`
             drivers = await UserModel.find({
                 workingDays: { $in: dayOfWeek },
-                'workingTime.from': { $lte: hour },
-                'workingTime.to': { $gt: hour },
+                'workingTime.from': { $lte: time },
+                'workingTime.to': { $gt: time },
                 role: 'DRIVER',
             });
         } else {

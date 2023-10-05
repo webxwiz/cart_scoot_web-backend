@@ -130,12 +130,12 @@ class RequestService {
 
         const { requestedTime } = data;
         const dayOfWeek = new Date(requestedTime).getDay();
-        const hour = new Date(requestedTime).getHours();
+        const time = +`${requestedTime.getHours()}.${requestedTime.getMinutes()}`
 
         const driverArray = await UserModel.find({
             workingDays: { $in: dayOfWeek },
-            'workingTime.from': { $lte: hour },
-            'workingTime.to': { $gt: hour },
+            'workingTime.from': { $lte: time },
+            'workingTime.to': { $gt: time },
         });
         const driverEmails = driverArray.map(user => user.email).filter(phone => phone !== undefined || null);
         const driverPhones = driverArray.map(user => user.phone?.number).filter(phone => phone !== undefined || null);
