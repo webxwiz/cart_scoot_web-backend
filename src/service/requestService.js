@@ -130,7 +130,7 @@ class RequestService {
 
         const { requestedTime } = data;
         const dayOfWeek = new Date(requestedTime).getDay();
-        const time = +`${requestedTime.getHours()}.${requestedTime.getMinutes()}`
+        const time = +`${new Date(requestedTime.getHours())}.${new Date(requestedTime.getMinutes())}`
 
         const driverArray = await UserModel.find({
             workingDays: { $in: dayOfWeek },
