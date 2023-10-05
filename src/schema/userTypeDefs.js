@@ -52,8 +52,8 @@ export const userTypeDefs = `#graphql
         status: StatusTypes
     }
     type WorkingTimeTypes {
-        from: Date
-        to: Date
+        from: Float
+        to: Float
     }
     type PhoneTypes {
         number: String
@@ -123,8 +123,8 @@ export const userTypeDefs = `#graphql
         workingTime: WorkingTimeInput
     }
     input WorkingTimeInput {
-        from: Date
-        to: Date
+        from: Float
+        to: Float
     }
     input ChangeUserRoleInput {
         id: ID!

@@ -37,8 +37,8 @@ const userSchema = new Schema({
     ],
     workingDays: [Number],
     workingTime: {
-        from: Date,
-        to: Date,
+        from: Number,
+        to: Number,
     },
     phoneCode: {
         code: String,
