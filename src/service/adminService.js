@@ -199,7 +199,7 @@ class AdminService {
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
             const requests = await RequestModel.find();
             if (!requests.length) {
-                throw new GraphQLError("Can't find any users")
+                throw new GraphQLError("Can't find any requests")
             };
 
             return requests;

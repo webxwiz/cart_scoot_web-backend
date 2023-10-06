@@ -18,6 +18,7 @@ export const userTypeDefs = `#graphql
         createdAt: Date                    
         userName: String
         email: String
+        coordinates: DriverCoordinates         
         resetPassword: ResetPasswordTypes
         avatarURL: String        
         license: LicenseTypes
@@ -26,16 +27,25 @@ export const userTypeDefs = `#graphql
         workingDays: [Int]
         workingTime: WorkingTimeTypes
         phone: PhoneTypes
-        coordinates: DriverCoordinates         
     }
     type Driver {
         _id: ID!
-        userName: String
         avatarURL: String
+        userName: String
+        coordinates: DriverCoordinates
         phone: PhoneTypes
+        role: RoleTypes
         workingDays: [Int]
         workingTime: WorkingTimeTypes
-        coordinates: DriverCoordinates
+    }
+    type Rider {
+        _id: ID!
+        avatarURL: String
+        driverRequests: [String]
+        email: String
+        phone: PhoneTypes
+        role: RoleTypes
+        userName: String
     }
     type DriverWithRating {
         driver: Driver
@@ -149,7 +159,8 @@ export const userTypeDefs = `#graphql
         getRiderProfile(id: ID!): User
 
         getAllDrivers: [User]
-        getAllRiders: [User]
+        getAllRiders: [Rider]
+        
         getAllUsers: [User]
         getAllLicenses: [User]
     }
