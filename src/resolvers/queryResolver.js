@@ -34,7 +34,7 @@ const queryResolver = {
             return reviews;
         },
         getAllReviews: async (parent, { pageNumber }, contextValue) => {
-            const reviews = await reviewService.getAllReviews(pageNumber);
+            const reviews = await adminService.getAllReviews(pageNumber, contextValue.token);
 
             return reviews;
         },

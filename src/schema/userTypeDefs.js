@@ -18,7 +18,8 @@ export const userTypeDefs = `#graphql
         createdAt: Date                    
         userName: String
         email: String
-        coordinates: DriverCoordinates         
+        coordinates: DriverCoordinates
+        banned: Boolean         
         resetPassword: ResetPasswordTypes
         avatarURL: String        
         license: LicenseTypes
@@ -35,6 +36,7 @@ export const userTypeDefs = `#graphql
         coordinates: DriverCoordinates
         phone: PhoneTypes
         role: RoleTypes
+        banned: Boolean
         workingDays: [Int]
         workingTime: WorkingTimeTypes
     }
@@ -45,6 +47,7 @@ export const userTypeDefs = `#graphql
         email: String
         phone: PhoneTypes
         role: RoleTypes
+        banned: Boolean
         userName: String
     }
     type DriverWithRating {

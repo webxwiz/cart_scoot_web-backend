@@ -57,19 +57,6 @@ class ReviewService {
         return reviews;
     }
 
-    async getAllReviews(pageNumber) {
-
-        const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
-        const reviewsOnPage = 50;
-
-        const reviews = await ReviewModel.find()
-            .sort({ createdAt: -1 })
-            .limit(reviewsOnPage)
-            .skip((validatePageNumber - 1) * reviewsOnPage);;
-
-        return reviews;
-    }
-
     async getDriverRating(token) {
         const { _id } = checkAuth(token);
 

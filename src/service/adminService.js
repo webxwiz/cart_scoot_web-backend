@@ -3,13 +3,14 @@ import { GraphQLError } from 'graphql';
 import AdvertisementModel from '../models/Advertisement.js';
 import RequestModel from '../models/Request.js';
 import UserModel from '../models/User.js';
+import ReviewModel from '../models/Review.js';
 
 import { checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.js';
 
 class AdminService {
 
     async getAllAdvertisement() {
-        const advertisements = await AdvertisementModel.find();
+        const advertisements = await AdvertisementModel.find().sort({ createdAt: -1 });
         if (advertisements) {
             throw new GraphQLError("Can't find any advertisements")
         };
@@ -102,7 +103,7 @@ class AdminService {
     }
 
     async sendBannedInfo(_id) {
-        const user = await findUserById(_id);        
+        const user = await findUserById(_id);
         if (user.phone.number) {
             return await smsSender(`Your account with email - ${user.email} has been banned by administrator`, phoneNumber);
         } else {
@@ -165,7 +166,7 @@ class AdminService {
         const user = await findUserById(_id);
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const users = await UserModel.find({ role });
+            const users = await UserModel.find({ role }).sort({ createdAt: -1 });
             if (!users.length) {
                 throw new GraphQLError("Can't find any users")
             };
@@ -197,7 +198,7 @@ class AdminService {
         const user = await findUserById(_id);
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const requests = await RequestModel.find();
+            const requests = await RequestModel.find().sort({ createdAt: -1 });
             if (!requests.length) {
                 throw new GraphQLError("Can't find any requests")
             };
@@ -219,10 +220,7 @@ class AdminService {
                     { 'license.status': 'APPROVED' },
                     { 'license.status': 'REJECTED' }
                 ]
-            });
-            if (!users.length) {
-                throw new GraphQLError("Can't find any users")
-            };
+            }).sort({ createdAt: -1 });
 
             return users;
         } else {
@@ -230,6 +228,24 @@ class AdminService {
         }
     }
 
+    async getAllReviews(pageNumber, token) {
+        const { _id } = checkAuth(token);
+        const user = await findUserById(_id);
+
+        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
+            const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
+            const reviewsOnPage = 7;
+
+            const reviews = await ReviewModel.find()
+                .sort({ createdAt: -1 })
+                .limit(reviewsOnPage)
+                .skip((validatePageNumber - 1) * reviewsOnPage);;
+
+            return reviews;
+        } else {
+            throw new GraphQLError("You haven't appropriate access")
+        }
+    }
 }
 
 export default new AdminService;
