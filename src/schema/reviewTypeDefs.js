@@ -26,7 +26,11 @@ export const reviewTypeDefs = `#graphql
     type RatingResult {
         totalCount: Int
         avgRating: Float
-    }   
+    }
+    type ReviewWithPagination {
+        reviews: [Review]
+        totalCount: Int
+    }  
 
     input GetReviewsByDriverIdInput {
         driverId: ID!
@@ -43,7 +47,7 @@ export const reviewTypeDefs = `#graphql
     }
     
     type Query {
-        getAllReviews(pageNumber: Int): [Review]
+        getAllReviews(pageNumber: Int): ReviewWithPagination
         getReviewsByDriverId(getReviewsByDriverIdInput: GetReviewsByDriverIdInput): [ReviewWithPopulatedFields] 
         getDriverRating: RatingResult       
     }

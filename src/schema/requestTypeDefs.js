@@ -89,6 +89,10 @@ export const requestTypeDefs = `#graphql
         request: Request
         message: String
     }
+    type RequestsWithPagination {
+        requests: [Request]
+        totalCount: Int
+    }
 
     input GetRequestsByFiltersInput {
         status: statusTypes
@@ -131,7 +135,7 @@ export const requestTypeDefs = `#graphql
         getRequest(id: ID!): RequestWithRating
         getRequestsByRider(getRequestsByFiltersInput: GetRequestsByFiltersInput): [RequestWithDriverPopulatedFields] 
         getRequestsByDriver(getRequestsByFiltersInput: GetRequestsByFiltersInput): [RequestWithRiderPopulatedFields] 
-        getAllRequests: [Request]
+        getAllRequests(pageNumber: Int): RequestsWithPagination
         getPendingRequests: [RequestWithRiderPopulatedFields]
 
         getAllFinishedRequests: [Request]

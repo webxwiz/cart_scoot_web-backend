@@ -161,17 +161,33 @@ class AdminService {
         }
     }
 
-    async getProfilesByRole(role, token) {
+    async getProfilesByRole(role, pageNumber, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const users = await UserModel.find({ role }).sort({ createdAt: -1 });
-            if (!users.length) {
+            const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
+            const itemsOnPage = 7;
+
+            const users = await UserModel
+                .aggregate()
+                .facet({
+                    data: [
+                        { $match: { role } },
+                        { $sort: { createdAt: -1 } },
+                        { $skip: (validatePageNumber - 1) * itemsOnPage },
+                        { $limit: itemsOnPage }
+                    ],
+                    totalCount: [
+                        { $match: { role } },
+                        { $count: "count" }
+                    ]
+                })
+            if (!users) {
                 throw new GraphQLError("Can't find any users")
             };
 
-            return users;
+            return { users: users[0].data, totalCount: users[0].totalCount[0].count };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }
@@ -183,7 +199,7 @@ class AdminService {
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
             const users = await UserModel.find();
-            if (!users.length) {
+            if (!users) {
                 throw new GraphQLError("Can't find any users")
             };
 
@@ -193,17 +209,28 @@ class AdminService {
         }
     }
 
-    async getAllRequests(token) {
+    async getAllRequests(pageNumber, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const requests = await RequestModel.find().sort({ createdAt: -1 });
-            if (!requests.length) {
-                throw new GraphQLError("Can't find any requests")
-            };
+            const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
+            const itemsOnPage = 7;
 
-            return requests;
+            const requests = await RequestModel
+                .aggregate()
+                .facet({
+                    data: [
+                        { $sort: { createdAt: -1 } },
+                        { $skip: (validatePageNumber - 1) * itemsOnPage },
+                        { $limit: itemsOnPage }
+                    ],
+                    totalCount: [
+                        { $count: "count" }
+                    ]
+                })
+
+            return { requests: requests[0].data, totalCount: requests[0].totalCount[0].count };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }
@@ -215,11 +242,7 @@ class AdminService {
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
             const users = await UserModel.find({
-                $or: [
-                    { 'license.status': 'WAITING' },
-                    { 'license.status': 'APPROVED' },
-                    { 'license.status': 'REJECTED' }
-                ]
+                'license.status': { $nin: ['PENDING'] },
             }).sort({ createdAt: -1 });
 
             return users;
@@ -234,14 +257,22 @@ class AdminService {
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
             const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
-            const reviewsOnPage = 7;
+            const itemsOnPage = 7;
 
-            const reviews = await ReviewModel.find()
-                .sort({ createdAt: -1 })
-                .limit(reviewsOnPage)
-                .skip((validatePageNumber - 1) * reviewsOnPage);;
+            const reviews = await ReviewModel
+                .aggregate()
+                .facet({
+                    data: [
+                        { $sort: { createdAt: -1 } },
+                        { $skip: (validatePageNumber - 1) * itemsOnPage },
+                        { $limit: itemsOnPage }
+                    ],
+                    totalCount: [
+                        { $count: "count" }
+                    ]
+                })
 
-            return reviews;
+            return { reviews: reviews[0].data, totalCount: reviews[0].totalCount[0].count };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }

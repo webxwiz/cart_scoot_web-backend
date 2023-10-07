@@ -96,7 +96,15 @@ export const userTypeDefs = `#graphql
     type UserPasswordResponse {
         status: Boolean
         message: String
-    }       
+    }  
+    type UsersWithPagination {
+        users: [User]
+        totalCount: Int
+    }     
+    type RidersWithPagination {
+        users: [Rider]
+        totalCount: Int
+    }     
     
     input GetFreeDriversInput {
         requestedTime: Date
@@ -161,8 +169,8 @@ export const userTypeDefs = `#graphql
         getDriverProfile(id: ID!): User   
         getRiderProfile(id: ID!): User
 
-        getAllDrivers: [User]
-        getAllRiders: [Rider]
+        getAllDrivers(pageNumber: Int): UsersWithPagination
+        getAllRiders(pageNumber: Int): RidersWithPagination
         
         getAllUsers: [User]
         getAllLicenses: [User]

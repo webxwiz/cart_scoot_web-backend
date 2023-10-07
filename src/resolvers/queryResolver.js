@@ -34,9 +34,9 @@ const queryResolver = {
             return reviews;
         },
         getAllReviews: async (parent, { pageNumber }, contextValue) => {
-            const reviews = await adminService.getAllReviews(pageNumber, contextValue.token);
+            const { reviews, totalCount } = await adminService.getAllReviews(pageNumber, contextValue.token);
 
-            return reviews;
+            return { reviews, totalCount };
         },
         getDriverRating: async (parent, args, contextValue) => {
             const { avgRating, totalCount } = await reviewService.getDriverRating(contextValue.token);
@@ -80,25 +80,25 @@ const queryResolver = {
             return requests;
         },
 
-        getAllDrivers: async (parent, args, contextValue) => {
-            const drivers = await adminService.getProfilesByRole('DRIVER', contextValue.token)
+        getAllDrivers: async (parent, { pageNumber }, contextValue) => {
+            const { users, totalCount } = await adminService.getProfilesByRole('DRIVER', pageNumber, contextValue.token)
 
-            return drivers;
+            return { users, totalCount };
         },
-        getAllRiders: async (parent, args, contextValue) => {
-            const riders = await adminService.getProfilesByRole('RIDER', contextValue.token)
+        getAllRiders: async (parent, { pageNumber }, contextValue) => {
+            const { users, totalCount } = await adminService.getProfilesByRole('RIDER', pageNumber, contextValue.token)
 
-            return riders;
+            return { users, totalCount };
         },
         getAllUsers: async (parent, args, contextValue) => {
             const users = await adminService.getAllUsers(contextValue.token)
 
             return users;
         },
-        getAllRequests: async (parent, args, contextValue) => {
-            const requests = await adminService.getAllRequests(contextValue.token);
+        getAllRequests: async (parent, { pageNumber }, contextValue) => {
+            const { requests, totalCount } = await adminService.getAllRequests(pageNumber, contextValue.token);
 
-            return requests;
+            return { requests, totalCount };
         },
         getAllLicenses: async (parent, args, contextValue) => {
             const users = await adminService.getAllLicenses(contextValue.token);
