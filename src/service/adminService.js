@@ -176,7 +176,7 @@ class AdminService {
                         { $match: { role } },
                         { $sort: { createdAt: -1 } },
                         { $skip: (validatePageNumber - 1) * itemsOnPage },
-                        { $limit: itemsOnPage }
+                        { $limit: itemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
                         { $match: { role } },
@@ -223,7 +223,7 @@ class AdminService {
                     data: [
                         { $sort: { createdAt: -1 } },
                         { $skip: (validatePageNumber - 1) * itemsOnPage },
-                        { $limit: itemsOnPage }
+                        { $limit: itemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
                         { $count: "count" }
@@ -265,7 +265,7 @@ class AdminService {
                     data: [
                         { $sort: { createdAt: -1 } },
                         { $skip: (validatePageNumber - 1) * itemsOnPage },
-                        { $limit: itemsOnPage }
+                        { $limit: itemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
                         { $count: "count" }

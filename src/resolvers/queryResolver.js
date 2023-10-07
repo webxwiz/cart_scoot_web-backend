@@ -29,9 +29,9 @@ const queryResolver = {
         },
 
         getReviewsByDriverId: async (parent, { getReviewsByDriverIdInput }, contextValue) => {
-            const reviews = await reviewService.getReviewsByDriverId(getReviewsByDriverIdInput);
+            const { reviews, totalCount } = await reviewService.getReviewsByDriverId(getReviewsByDriverIdInput);
 
-            return reviews;
+            return { reviews, totalCount };
         },
         getAllReviews: async (parent, { pageNumber }, contextValue) => {
             const { reviews, totalCount } = await adminService.getAllReviews(pageNumber, contextValue.token);
@@ -50,14 +50,14 @@ const queryResolver = {
             return { request, avgRating };
         },
         getRequestsByRider: async (parent, { getRequestsByFiltersInput }, contextValue) => {
-            const requests = await requestService.getRequestsByRider(getRequestsByFiltersInput, contextValue.token);
+            const { requests, totalCount } = await requestService.getRequestsByRider(getRequestsByFiltersInput, contextValue.token);
 
-            return requests;
+            return { requests, totalCount };
         },
         getRequestsByDriver: async (parent, { getRequestsByFiltersInput }, contextValue) => {
-            const requests = await requestService.getRequestsByDriver(getRequestsByFiltersInput, contextValue.token);
+            const { requests, totalCount } = await requestService.getRequestsByDriver(getRequestsByFiltersInput, contextValue.token);
 
-            return requests;
+            return { requests, totalCount };
         },
         getPendingRequests: async (parent, args, contextValue) => {
             const requests = await requestService.getAllRequestsByStatus('PENDING', contextValue.token);

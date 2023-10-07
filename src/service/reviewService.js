@@ -46,7 +46,7 @@ class ReviewService {
         const reviews = await ReviewModel.find
             ({
                 driverId,
-                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
+                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
                 ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
             })
             .limit(6 * validPage)
@@ -54,7 +54,14 @@ class ReviewService {
             .populate({ path: 'createdBy', select: userPopulatedFields })
             .populate({ path: 'driverId', select: userPopulatedFields });
 
-        return reviews;
+        const totalCount = (await ReviewModel.find
+            ({
+                driverId,
+                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+            })).length;
+
+        return { reviews, totalCount };
     }
 
     async getDriverRating(token) {

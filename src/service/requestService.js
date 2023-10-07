@@ -57,7 +57,15 @@ class RequestService {
             .sort({ createdAt: -1 })
             .populate({ path: 'driverId', select: userPopulatedFields });
 
-        return requests;
+        const totalCount = (await RequestModel.find
+            ({
+                userId: _id,
+                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
+                ...(status && { status }),
+                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+            })).length
+
+        return { requests, totalCount };
     }
 
     async getRequestsByDriver(
@@ -78,7 +86,15 @@ class RequestService {
             .sort({ createdAt: -1 })
             .populate({ path: 'userId', select: userPopulatedFields });
 
-        return requests;
+        const totalCount = (await RequestModel.find
+            ({
+                driverId: _id,
+                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
+                ...(status && { status }),
+                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+            })).length
+
+        return { requests, totalCount };
     }
 
     async createOneDriverRequest({ id, ...data }, role, token) {
