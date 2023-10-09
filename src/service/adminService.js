@@ -175,7 +175,6 @@ class AdminService {
                     data: [
                         { $match: { role } },
                         { $sort: { createdAt: -1 } },
-                        { $skip: (validatePageNumber - 1) * itemsOnPage },
                         { $limit: itemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
@@ -206,7 +205,6 @@ class AdminService {
                 .facet({
                     data: [
                         { $sort: { createdAt: -1 } },
-                        { $skip: (validatePageNumber - 1) * validItemsOnPage },
                         { $limit: validItemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
@@ -248,7 +246,6 @@ class AdminService {
                 .facet({
                     data: [
                         { $sort: { createdAt: -1 } },
-                        { $skip: (validatePageNumber - 1) * itemsOnPage },
                         { $limit: itemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
