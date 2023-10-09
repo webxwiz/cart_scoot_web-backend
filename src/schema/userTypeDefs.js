@@ -172,8 +172,7 @@ export const userTypeDefs = `#graphql
         getAllDrivers(pageNumber: Int): UsersWithPagination
         getAllRiders(pageNumber: Int): RidersWithPagination
         
-        getAllUsers: [User]
-        getAllLicenses: [User]
+        getWaitingLicenses: [User]
     }
     type Mutation {
         registerByEmail(registerUserInput: RegisterUserInput): UserWithToken        

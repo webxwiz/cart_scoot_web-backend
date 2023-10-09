@@ -90,18 +90,14 @@ const queryResolver = {
 
             return { users, totalCount };
         },
-        getAllUsers: async (parent, args, contextValue) => {
-            const users = await adminService.getAllUsers(contextValue.token)
 
-            return users;
-        },
         getAllRequests: async (parent, { pageNumber }, contextValue) => {
             const { requests, totalCount } = await adminService.getAllRequests(pageNumber, contextValue.token);
 
             return { requests, totalCount };
         },
-        getAllLicenses: async (parent, args, contextValue) => {
-            const users = await adminService.getAllLicenses(contextValue.token);
+        getWaitingLicenses: async (parent, args, contextValue) => {
+            const users = await adminService.getWaitingLicenses(contextValue.token);
 
             return users;
         },

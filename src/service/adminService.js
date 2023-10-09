@@ -193,22 +193,6 @@ class AdminService {
         }
     }
 
-    async getAllUsers(token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
-
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const users = await UserModel.find();
-            if (!users) {
-                throw new GraphQLError("Can't find any users")
-            };
-
-            return users;
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
-    }
-
     async getAllRequests(pageNumber, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
@@ -236,13 +220,13 @@ class AdminService {
         }
     }
 
-    async getAllLicenses(token) {
+    async getWaitingLicenses(token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
             const users = await UserModel.find({
-                'license.status': { $nin: ['PENDING'] },
+                'license.status': 'WAITING',
             }).sort({ createdAt: -1 });
 
             return users;
