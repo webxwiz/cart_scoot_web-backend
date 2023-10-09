@@ -186,7 +186,7 @@ class AdminService {
                 throw new GraphQLError("Can't find any users")
             };
 
-            return { users: users[0].data, totalCount: users[0].totalCount[0].count };
+            return { users: users[0]?.data, totalCount: users[0]?.totalCount[0]?.count };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }
