@@ -193,21 +193,21 @@ class AdminService {
         }
     }
 
-    async getAllRequests(pageNumber, token) {
+    async getAllRequests({ pageNumber, itemsOnPage }, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
             const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
-            const itemsOnPage = 7;
+            const validItemsOnPage = itemsOnPage > 0 ? itemsOnPage : 7;
 
             const requests = await RequestModel
                 .aggregate()
                 .facet({
                     data: [
                         { $sort: { createdAt: -1 } },
-                        { $skip: (validatePageNumber - 1) * itemsOnPage },
-                        { $limit: itemsOnPage * validatePageNumber }
+                        { $skip: (validatePageNumber - 1) * validItemsOnPage },
+                        { $limit: validItemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
                         { $count: "count" }
