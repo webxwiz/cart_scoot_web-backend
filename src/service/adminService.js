@@ -193,7 +193,7 @@ class AdminService {
         }
     }
 
-    async getAllRequests({ pageNumber, itemsOnPage }, token) {
+    async getAllRequests(pageNumber, itemsOnPage, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 

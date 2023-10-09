@@ -91,8 +91,8 @@ const queryResolver = {
             return { users, totalCount };
         },
 
-        getAllRequests: async (parent, { getAllRequestsInput }, contextValue) => {
-            const { requests, totalCount } = await adminService.getAllRequests(getAllRequestsInput, contextValue.token);
+        getAllRequests: async (parent, { pageNumber, itemsOnPage }, contextValue) => {
+            const { requests, totalCount } = await adminService.getAllRequests(pageNumber, itemsOnPage, contextValue.token);
 
             return { requests, totalCount };
         },

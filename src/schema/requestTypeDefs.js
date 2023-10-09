@@ -138,16 +138,12 @@ export const requestTypeDefs = `#graphql
         lat: Float
         lon: Float
     }
-    input GetAllRequestsInput {
-        pageNumber: Int
-        itemsOnPage: Int
-    }
 
     type Query {
         getRequest(id: ID!): RequestWithRating
         getRequestsByRider(getRequestsByFiltersInput: GetRequestsByFiltersInput): RequestsByRiderWithPagination 
         getRequestsByDriver(getRequestsByFiltersInput: GetRequestsByFiltersInput): RequestsByDriverWithPagination 
-        getAllRequests(getAllRequestsInput: GetAllRequestsInput): RequestsWithPagination
+        getAllRequests(pageNumber: Int, itemsOnPage: Int): RequestsWithPagination
         getPendingRequests: [RequestWithRiderPopulatedFields]
 
         getAllFinishedRequests: [Request]
