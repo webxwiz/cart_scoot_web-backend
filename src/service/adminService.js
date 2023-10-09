@@ -212,7 +212,7 @@ class AdminService {
                     ]
                 })
 
-            return { requests: requests[0].data, totalCount: requests[0].totalCount[0].count };
+            return { requests: requests[0]?.data, totalCount: requests[0]?.totalCount[0]?.count };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }
@@ -265,7 +265,7 @@ class AdminService {
                     ]
                 })
 
-            return { reviews: reviews[0].data, totalCount: reviews[0].totalCount[0].count };
+            return { reviews: reviews[0]?.data, totalCount: reviews[0]?.totalCount[0]?.count };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }
