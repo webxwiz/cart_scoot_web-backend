@@ -49,9 +49,15 @@ export const reviewTypeDefs = `#graphql
         rating: Int
         requestCode: String
     }
+    input GetAllReviewsInput {
+        pageNumber: Int
+        searchRequestCode: String
+        dateFrom: Date
+        dateTo: Date
+    }
     
     type Query {
-        getAllReviews(pageNumber: Int): ReviewWithPagination
+        getAllReviews(getAllReviewsInput: GetAllReviewsInput): ReviewWithPagination
         getReviewsByDriverId(getReviewsByDriverIdInput: GetReviewsByDriverIdInput): ReviewWithPaginationAndFields 
         getDriverRating: RatingResult       
     }

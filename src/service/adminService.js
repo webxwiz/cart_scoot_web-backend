@@ -233,7 +233,7 @@ class AdminService {
         }
     }
 
-    async getAllReviews(pageNumber, token) {
+    async getAllReviews({ pageNumber, searchRequestCode, dateFrom, dateTo }, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
@@ -245,10 +245,22 @@ class AdminService {
                 .aggregate()
                 .facet({
                     data: [
+                        {
+                            $match: {
+                                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+                                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+                            }
+                        },
                         { $sort: { createdAt: -1 } },
                         { $limit: itemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
+                        {
+                            $match: {
+                                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+                                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+                            }
+                        },
                         { $count: "count" }
                     ]
                 })

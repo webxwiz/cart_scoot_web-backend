@@ -33,8 +33,8 @@ const queryResolver = {
 
             return { reviews, totalCount };
         },
-        getAllReviews: async (parent, { pageNumber }, contextValue) => {
-            const { reviews, totalCount } = await adminService.getAllReviews(pageNumber, contextValue.token);
+        getAllReviews: async (parent, { getAllReviewsInput }, contextValue) => {
+            const { reviews, totalCount } = await adminService.getAllReviews(getAllReviewsInput, contextValue.token);
 
             return { reviews, totalCount };
         },
@@ -61,21 +61,6 @@ const queryResolver = {
         },
         getPendingRequests: async (parent, args, contextValue) => {
             const requests = await requestService.getAllRequestsByStatus('PENDING', contextValue.token);
-
-            return requests;
-        },
-        getAllFinishedRequests: async (parent, args, contextValue) => {
-            const requests = await requestService.getAllRequestsByStatus('FINISHED', contextValue.token);
-
-            return requests;
-        },
-        getNotFinishedRequests: async (parent, args, contextValue) => {
-            const requests = await requestService.getNotFinishedRequests();
-
-            return requests;
-        },
-        getFinishedRequestsByDriver: async (parent, { id }, contextValue) => {
-            const requests = await requestService.getFinishedRequestsByDriver(id, contextValue.token);
 
             return requests;
         },

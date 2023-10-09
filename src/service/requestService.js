@@ -371,28 +371,6 @@ class RequestService {
 
         return requests;
     }
-
-    async getFinishedRequestsByDriver(id, token) {
-        const { _id } = checkAuth(token);
-        await findUserById(_id);
-
-        const requests = await RequestModel.find({
-            status: 'FINISHED',
-            driverId: id,
-        });
-
-        return requests;
-    }
-
-    async getNotFinishedRequests() {
-
-        const requests = await RequestModel.find({
-            status: { $not: { $eq: 'FINISHED' } },
-        });
-
-        return requests;
-    }
-
 }
 
 export default new RequestService;
