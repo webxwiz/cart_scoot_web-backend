@@ -103,11 +103,19 @@ export const requestTypeDefs = `#graphql
     }
 
     input GetRequestsByFiltersInput {
-        status: statusTypes
         page: Int
         searchRequestCode: String
         dateFrom: Date
         dateTo: Date
+        status: statusTypes
+    }
+    input GetAllRequestsInput {
+        pageNumber: Int
+        itemsOnPage: Int
+        searchRequestCode: String
+        dateFrom: Date
+        dateTo: Date
+        status: statusTypes
     }
     input CreateOneDriverRequestInput {
         id: ID!
@@ -141,9 +149,11 @@ export const requestTypeDefs = `#graphql
 
     type Query {
         getRequest(id: ID!): RequestWithRating
+
+        getAllRequests(getAllRequestsInput: GetAllRequestsInput): RequestsWithPagination
         getRequestsByRider(getRequestsByFiltersInput: GetRequestsByFiltersInput): RequestsByRiderWithPagination 
-        getRequestsByDriver(getRequestsByFiltersInput: GetRequestsByFiltersInput): RequestsByDriverWithPagination 
-        getAllRequests(pageNumber: Int, itemsOnPage: Int): RequestsWithPagination
+        getRequestsByDriver(getRequestsByFiltersInput: GetRequestsByFiltersInput): RequestsByDriverWithPagination
+
         getPendingRequests: [RequestWithRiderPopulatedFields]
     }
     type Mutation {

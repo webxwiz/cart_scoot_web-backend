@@ -23,11 +23,10 @@ class AdminService {
                     },
                 });
 
-            const trips = await RequestModel.find({ status: { $in: ['APPROVED', 'ACTIVE', 'FINISHED'] } })
-
             const totalRiders = users?.find(item => item._id === 'RIDER')?.count || 0;
             const totalDrivers = users?.find(item => item._id === 'DRIVER')?.count || 0;
-            const totalTrips = trips.length;
+
+            const totalTrips = await RequestModel.countDocuments();
 
             return { totalRiders, totalDrivers, totalTrips }
         } else {
@@ -187,7 +186,7 @@ class AdminService {
         }
     }
 
-    async getProfilesByRole(role, pageNumber, token) {
+    async getProfilesByRole(role, { pageNumber, searchUserName, status }, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
@@ -197,14 +196,17 @@ class AdminService {
 
             const users = await UserModel
                 .aggregate()
+                .match({
+                    role,
+                    ...(status && { "license.status": status }),
+                    ...(searchUserName && { userName: { $regex: searchUserName, $options: 'i' } }),
+                })
                 .facet({
                     data: [
-                        { $match: { role } },
                         { $sort: { createdAt: -1 } },
                         { $limit: itemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
-                        { $match: { role } },
                         { $count: "count" }
                     ]
                 })
@@ -218,7 +220,7 @@ class AdminService {
         }
     }
 
-    async getAllRequests(pageNumber, itemsOnPage, token) {
+    async getAllRequests({ pageNumber, itemsOnPage, searchRequestCode, dateFrom, dateTo, status }, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
@@ -228,6 +230,11 @@ class AdminService {
 
             const requests = await RequestModel
                 .aggregate()
+                .match({
+                    createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+                    ...(status && { status }),
+                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+                })
                 .facet({
                     data: [
                         { $sort: { createdAt: -1 } },
@@ -269,24 +276,16 @@ class AdminService {
 
             const reviews = await ReviewModel
                 .aggregate()
+                .match({
+                    createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+                })
                 .facet({
                     data: [
-                        {
-                            $match: {
-                                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-                            }
-                        },
                         { $sort: { createdAt: -1 } },
                         { $limit: itemsOnPage * validatePageNumber }
                     ],
                     totalCount: [
-                        {
-                            $match: {
-                                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-                            }
-                        },
                         { $count: "count" }
                     ]
                 })

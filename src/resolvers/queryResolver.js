@@ -49,6 +49,11 @@ const queryResolver = {
 
             return { request, avgRating };
         },
+        getAllRequests: async (parent, { getAllRequestsInput }, contextValue) => {
+            const { requests, totalCount } = await adminService.getAllRequests(getAllRequestsInput, contextValue.token);
+
+            return { requests, totalCount };
+        },
         getRequestsByRider: async (parent, { getRequestsByFiltersInput }, contextValue) => {
             const { requests, totalCount } = await requestService.getRequestsByRider(getRequestsByFiltersInput, contextValue.token);
 
@@ -70,22 +75,17 @@ const queryResolver = {
 
             return { totalRiders, totalDrivers, totalTrips };
         },
-        getAllDrivers: async (parent, { pageNumber }, contextValue) => {
-            const { users, totalCount } = await adminService.getProfilesByRole('DRIVER', pageNumber, contextValue.token)
+        getAllDrivers: async (parent, { getAllUsersInput }, contextValue) => {
+            const { users, totalCount } = await adminService.getProfilesByRole('DRIVER', getAllUsersInput, contextValue.token)
 
             return { users, totalCount };
         },
-        getAllRiders: async (parent, { pageNumber }, contextValue) => {
-            const { users, totalCount } = await adminService.getProfilesByRole('RIDER', pageNumber, contextValue.token)
+        getAllRiders: async (parent, { getAllUsersInput }, contextValue) => {
+            const { users, totalCount } = await adminService.getProfilesByRole('RIDER', getAllUsersInput, contextValue.token)
 
             return { users, totalCount };
         },
 
-        getAllRequests: async (parent, { pageNumber, itemsOnPage }, contextValue) => {
-            const { requests, totalCount } = await adminService.getAllRequests(pageNumber, itemsOnPage, contextValue.token);
-
-            return { requests, totalCount };
-        },
         getWaitingLicenses: async (parent, args, contextValue) => {
             const users = await adminService.getWaitingLicenses(contextValue.token);
 

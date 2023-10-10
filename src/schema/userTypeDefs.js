@@ -114,6 +114,11 @@ export const userTypeDefs = `#graphql
     input GetFreeDriversInput {
         requestedTime: Date
     }
+    input GetAllUsersInput {
+        pageNumber: Int 
+        searchUserName: String
+        status: StatusTypes
+    }
     input RegisterUserInput {        
         userName: String!
         email: String!
@@ -175,8 +180,8 @@ export const userTypeDefs = `#graphql
         getRiderProfile(id: ID!): User
 
         getStatistic: Statistic
-        getAllDrivers(pageNumber: Int): UsersWithPagination
-        getAllRiders(pageNumber: Int): RidersWithPagination
+        getAllDrivers(getAllUsersInput: GetAllUsersInput): UsersWithPagination
+        getAllRiders(getAllUsersInput: GetAllUsersInput): RidersWithPagination
         
         getWaitingLicenses: [User]
     }
