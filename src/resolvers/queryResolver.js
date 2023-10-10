@@ -65,6 +65,11 @@ const queryResolver = {
             return requests;
         },
 
+        getStatistic: async (parent, args, contextValue) => {
+            const { totalRiders, totalDrivers, totalTrips } = await adminService.getStatistic(contextValue.token);
+
+            return { totalRiders, totalDrivers, totalTrips };
+        },
         getAllDrivers: async (parent, { pageNumber }, contextValue) => {
             const { users, totalCount } = await adminService.getProfilesByRole('DRIVER', pageNumber, contextValue.token)
 

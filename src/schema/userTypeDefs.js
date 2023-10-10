@@ -104,7 +104,12 @@ export const userTypeDefs = `#graphql
     type RidersWithPagination {
         users: [Rider]
         totalCount: Int
-    }     
+    }
+    type Statistic {
+        totalRiders: Int
+        totalDrivers: Int
+        totalTrips: Int
+    }   
     
     input GetFreeDriversInput {
         requestedTime: Date
@@ -169,6 +174,7 @@ export const userTypeDefs = `#graphql
         getDriverProfile(id: ID!): User   
         getRiderProfile(id: ID!): User
 
+        getStatistic: Statistic
         getAllDrivers(pageNumber: Int): UsersWithPagination
         getAllRiders(pageNumber: Int): RidersWithPagination
         

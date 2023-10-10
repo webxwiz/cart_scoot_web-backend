@@ -9,6 +9,32 @@ import { checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.
 
 class AdminService {
 
+    async getStatistic(token) {
+        const { _id } = checkAuth(token);
+        const user = await findUserById(_id);
+
+        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
+            const users = await UserModel
+                .aggregate()
+                .group({
+                    _id: '$role',
+                    count: {
+                        $sum: 1,
+                    },
+                });
+
+            const trips = await RequestModel.find({ status: { $in: ['APPROVED', 'ACTIVE', 'FINISHED'] } })
+
+            const totalRiders = users?.find(item => item._id === 'RIDER')?.count || 0;
+            const totalDrivers = users?.find(item => item._id === 'DRIVER')?.count || 0;
+            const totalTrips = trips.length;
+
+            return { totalRiders, totalDrivers, totalTrips }
+        } else {
+            throw new GraphQLError("You haven't appropriate access")
+        }
+    }
+
     async getAllAdvertisement() {
         const advertisements = await AdvertisementModel.find().sort({ createdAt: -1 });
         if (advertisements) {
