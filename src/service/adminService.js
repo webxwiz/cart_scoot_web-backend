@@ -127,19 +127,34 @@ class AdminService {
         }
     }
 
-    async sendBannedInfo(_id) {
-        const user = await findUserById(_id);
+    async sendBannedInfo(_id, banned) {
+        const user = await UserModel.findById(_id);
+        if (!user) {
+            throw new GraphQLError("Can't find user")
+        };
+
         if (user.phone.number) {
-            return await smsSender(`Your account with email - ${user.email} has been banned by administrator`, phoneNumber);
+            return await smsSender(banned ?
+                `Your account with email - ${user.email} has been banned by administrator`
+                : `Your account with email - ${user.email} is active`,
+                phoneNumber);
         } else {
             await mailSender({
                 to: user.email,
-                subject: 'Banned information',
-                text: 'Your account banned',
-                html: `
+                subject: 'User status information',
+                text: banned ? 'Your account banned' : 'Your account is activate',
+                html: banned ?
+                    `
                         <h2>Hello!</h2>
                         <h2>You account has been banned by administrator. Please contact for details</h2>
                         <h4>Please, follow the link for more details</h4>
+                        <hr/>
+                        <br/>
+                        <a href='${process.env.FRONT_URL}/contacts'>Contact link</a>
+                    ` :
+                    `
+                        <h2>Hello!</h2>
+                        <h2>You account has been activated. You can use our service</h2>
                         <hr/>
                         <br/>
                         <a href='${process.env.FRONT_URL}/contacts'>Contact link</a>
@@ -164,7 +179,7 @@ class AdminService {
             if (!updatedUser) {
                 throw new GraphQLError("Modified forbidden")
             } else {
-                if (banned) this.sendBannedInfo(id);
+                this.sendBannedInfo(id, banned);
                 return updatedUser
             }
         } else if (user.role === 'SUBADMIN') {
@@ -178,7 +193,7 @@ class AdminService {
             if (!updatedUser) {
                 throw new GraphQLError("Modified forbidden")
             } else {
-                if (banned) this.sendBannedInfo(id);
+                this.sendBannedInfo(id, banned);
                 return updatedUser
             }
         } else {
