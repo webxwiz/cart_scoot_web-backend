@@ -243,24 +243,27 @@ class AdminService {
             const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
             const validItemsOnPage = itemsOnPage > 0 ? itemsOnPage : 7;
 
+            const userPopulatedFields = ['_id', 'userName', 'avatarURL', 'phone'];
+
             const requests = await RequestModel
-                .aggregate()
-                .match({
+                .find({
                     createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
                     ...(status && { status }),
                     ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
                 })
-                .facet({
-                    data: [
-                        { $sort: { createdAt: -1 } },
-                        { $limit: validItemsOnPage * validatePageNumber }
-                    ],
-                    totalCount: [
-                        { $count: "count" }
-                    ]
-                })
+                .sort({ createdAt: -1 })
+                .limit(validItemsOnPage * validatePageNumber)
+                .populate({ path: 'userId', select: userPopulatedFields })
+                .populate({ path: 'driverId', select: userPopulatedFields });
 
-            return { requests: requests[0]?.data, totalCount: requests[0]?.totalCount[0]?.count };
+            const totalCount = (await RequestModel
+                .find({
+                    createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+                    ...(status && { status }),
+                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+                })).length;
+
+            return { requests, totalCount };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }

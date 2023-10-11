@@ -90,7 +90,7 @@ export const requestTypeDefs = `#graphql
         message: String
     }
     type RequestsWithPagination {
-        requests: [Request]
+        requests: [RequestWithAllUserPopulatedFields]
         totalCount: Int
     }
     type RequestsByRiderWithPagination {
