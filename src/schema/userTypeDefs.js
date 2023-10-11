@@ -207,8 +207,7 @@ export const userTypeDefs = `#graphql
 
         changeUserRole(changeUserRoleInput: ChangeUserRoleInput): User
         answerDriverLicense(answerDriverLicense: AnswerDriverLicense): User
-        banUser(_id: ID!): User
-        unBanUser(_id: ID!): User
+        changeUserStatus(_id: ID!, status: Boolean): User
 
         addCoordinates(updateCoordinatesInput: UpdateCoordinatesInput): User
     }    

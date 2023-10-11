@@ -192,14 +192,9 @@ const mutationResolver = {
             return user;
         },
 
-        banUser: async (parent, { id }, contextValue) => {
-            const user = await adminService.changeBunStatus(id, true, contextValue.token);
 
-            return user;
-        },
-
-        unBanUser: async (parent, { id }, contextValue) => {
-            const user = await adminService.changeBunStatus(id, false, contextValue.token);
+        changeUserStatus: async (parent, { _id, status }, contextValue) => {
+            const user = await adminService.changeBunStatus(_id, status, contextValue.token);
 
             return user;
         },
