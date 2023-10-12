@@ -174,12 +174,6 @@ const mutationResolver = {
             return user;
         },
 
-        sendLicenseForApprove: async (parent, args, contextValue) => {
-            const user = await uploadService.changeLicenseStatus('WAITING', 'DRIVER', contextValue.token);
-
-            return user;
-        },
-
         changeUserRole: async (parent, { changeUserRoleInput }, contextValue) => {
             const user = await adminService.changeUserRole(changeUserRoleInput, contextValue.token);
 

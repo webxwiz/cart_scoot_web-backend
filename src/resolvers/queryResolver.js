@@ -17,16 +17,6 @@ const queryResolver = {
 
             return drivers;
         },
-        getDriverProfile: async (parent, { id }, contextValue) => {
-            const driver = await userService.getProfileById(id, 'DRIVER');
-
-            return driver;
-        },
-        getRiderProfile: async (parent, { id }, contextValue) => {
-            const rider = await userService.getProfileById(id, 'RIDER');
-
-            return rider;
-        },
 
         getReviewsByDriverId: async (parent, { getReviewsByDriverIdInput }, contextValue) => {
             const { reviews, totalCount } = await reviewService.getReviewsByDriverId(getReviewsByDriverIdInput);

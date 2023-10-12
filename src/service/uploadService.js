@@ -3,7 +3,7 @@ import { basename } from 'path';
 import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
-import { findUserById, findUserByIdAndRole, checkAuth } from '../utils/_index.js';
+import { findUserById } from '../utils/_index.js';
 
 class UploadService {
 
@@ -65,23 +65,6 @@ class UploadService {
             throw new GraphQLError("Modified forbidden")
         } else return { imageKeyList, updatedUser };
     }
-
-    async changeLicenseStatus(status, role, token) {
-        const { _id } = checkAuth(token);
-        await findUserByIdAndRole(_id, role);
-
-        const updatedUser = await UserModel.findOneAndUpdate(
-            { _id },
-            {
-                $set: { 'license.status': status }
-            },
-            { new: true },
-        );
-        if (!updatedUser) {
-            throw new GraphQLError("Modified forbidden")
-        } else return updatedUser
-    }
-
 }
 
 export default new UploadService;

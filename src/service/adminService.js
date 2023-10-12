@@ -105,7 +105,7 @@ class AdminService {
         }
     }
 
-    async answerDriverLicense({ id, answer }, token) {
+    async answerDriverLicense({ driverId, answer }, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
@@ -113,7 +113,7 @@ class AdminService {
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
             const updatedUser = await UserModel.findOneAndUpdate(
-                { _id: id },
+                { _id: driverId },
                 {
                     $set: { 'license.status': status }
                 },

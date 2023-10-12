@@ -162,7 +162,7 @@ export const userTypeDefs = `#graphql
         role: String
     }
     input AnswerDriverLicense {
-        id: ID!
+        driverId: ID!
         answer: Boolean
     }
     input UpdateCoordinatesInput {
@@ -176,9 +176,7 @@ export const userTypeDefs = `#graphql
     type Query {
         getUserByToken: User        
         getFreeDrivers(getFreeDriversInput: GetFreeDriversInput): [DriverWithRating]
-        getDriverProfile(id: ID!): User   
-        getRiderProfile(id: ID!): User
-
+ 
         getStatistic: Statistic
         getAllDrivers(getAllUsersInput: GetAllUsersInput): UsersWithPagination
         getAllRiders(getAllUsersInput: GetAllUsersInput): RidersWithPagination
@@ -203,7 +201,6 @@ export const userTypeDefs = `#graphql
         changeUserName(changeUserNameInput: ChangeUserNameInput): User
         deleteUser(_id: ID!): UserDeleteResponse
         updateWorkingTime(updateWorkingTimeInput: UpdateWorkingTimeInput): User
-        sendLicenseForApprove: User
 
         changeUserRole(changeUserRoleInput: ChangeUserRoleInput): User
         answerDriverLicense(answerDriverLicense: AnswerDriverLicense): User
