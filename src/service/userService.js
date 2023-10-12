@@ -327,7 +327,7 @@ class UserService {
         const driverWithRating = drivers.map((driver, i) => {
             return {
                 driver,
-                rating: Math.round(driverReviews[i].avgRating * 10) / 10,
+                rating: driverReviews[i]?.avgRating ? Math.round(driverReviews[i].avgRating * 10) / 10 : 0,
             }
         });
 
