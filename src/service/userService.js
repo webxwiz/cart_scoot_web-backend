@@ -57,7 +57,7 @@ class UserService {
         if (!user) {
             throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
         }
-        
+
         return user;
     }
 
@@ -324,16 +324,16 @@ class UserService {
                 totalCount: { $sum: 1 },
                 avgRating: { $avg: '$rating' },
             });
-        const driverWithRating = drivers.map((driver, i) => {
+
+        const driverWithRating = drivers.map(driver => {
             return {
                 driver,
-                rating: driverReviews[i]?.avgRating ? Math.round(driverReviews[i].avgRating * 10) / 10 : 0,
+                rating: Math.round(driverReviews.find(item => item._id.toString() === driver._id.toString())?.avgRating * 10) / 10 || 0,
             }
-        });
+        })
 
         return driverWithRating;
     }
-
 }
 
 export default new UserService;
