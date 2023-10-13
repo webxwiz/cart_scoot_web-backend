@@ -161,11 +161,11 @@ class AdminService {
             throw new GraphQLError("Can't find user")
         };
 
-        if (user.phone.number) {
+        if (user.phone?.number) {
             return await smsSender(banned ?
-                `Your account with email - ${user.email} has been banned by administrator`
-                : `Your account with email - ${user.email} is active`,
-                phoneNumber);
+                `Your account has been banned by administrator`
+                : `Your account is active`,
+                user.phone.number);
         } else {
             await mailSender({
                 to: user.email,
