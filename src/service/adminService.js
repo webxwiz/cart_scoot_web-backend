@@ -29,8 +29,9 @@ class AdminService {
                     avgRating: { $avg: '$rating' },
                 });
             const rating = Math.round(driverRating[0]?.avgRating * 10) / 10 || 0;
+            const totalCount = driverRating[0]?.totalCount;
 
-            return { driver, rating };
+            return { driver, rating, totalCount };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }

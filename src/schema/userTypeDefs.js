@@ -57,6 +57,7 @@ export const userTypeDefs = `#graphql
     type UserWithRating {
         driver: User
         rating: Float
+        totalCount: Int
     }
     type ResetPasswordTypes {
         token: String

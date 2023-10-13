@@ -18,9 +18,9 @@ const queryResolver = {
             return drivers;
         },
         getDriverWithRating: async (parent, { driverId }, contextValue) => {
-            const { rating, driver } = await adminService.getDriverWithRating(driverId, contextValue.token);
+            const { rating, driver, totalCount } = await adminService.getDriverWithRating(driverId, contextValue.token);
 
-            return { rating, driver };
+            return { rating, driver, totalCount };
         },
 
         getReviewsByDriverId: async (parent, { getReviewsByDriverIdInput }, contextValue) => {
