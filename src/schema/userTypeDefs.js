@@ -166,7 +166,7 @@ export const userTypeDefs = `#graphql
         id: ID!
         role: String
     }
-    input AnswerDriverLicense {
+    input AnswerDriverLicenseInput {
         driverId: ID!
         answer: Boolean
     }
@@ -209,7 +209,7 @@ export const userTypeDefs = `#graphql
         updateWorkingTime(updateWorkingTimeInput: UpdateWorkingTimeInput): User
 
         changeUserRole(changeUserRoleInput: ChangeUserRoleInput): User
-        answerDriverLicense(answerDriverLicense: AnswerDriverLicense): User
+        answerDriverLicense(answerDriverLicenseInput: AnswerDriverLicenseInput): User
         changeUserStatus(_id: ID!, status: Boolean): User
 
         addCoordinates(updateCoordinatesInput: UpdateCoordinatesInput): User

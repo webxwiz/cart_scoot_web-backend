@@ -180,8 +180,8 @@ const mutationResolver = {
             return user;
         },
 
-        answerDriverLicense: async (parent, { answerDriverLicense }, contextValue) => {
-            const user = await adminService.answerDriverLicense(answerDriverLicense, contextValue.token);
+        answerDriverLicense: async (parent, { answerDriverLicenseInput }, contextValue) => {
+            const user = await adminService.answerDriverLicense(answerDriverLicenseInput, contextValue.token);
 
             return user;
         },
