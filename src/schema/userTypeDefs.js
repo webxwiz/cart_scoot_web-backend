@@ -175,6 +175,7 @@ export const userTypeDefs = `#graphql
 
     type Query {
         getUserByToken: User        
+        getUserById(userId: ID!): User        
         getFreeDrivers(getFreeDriversInput: GetFreeDriversInput): [DriverWithRating]
  
         getStatistic: Statistic

@@ -12,6 +12,11 @@ const queryResolver = {
 
             return user;
         },
+        getUserById: async (parent, { userId }, contextValue) => {
+            const user = await adminService.getUserById(userId, contextValue.token);
+
+            return user;
+        },
         getFreeDrivers: async (parent, { getFreeDriversInput }, contextValue) => {
             const drivers = await userService.getFreeDrivers(getFreeDriversInput);
 

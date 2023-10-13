@@ -9,6 +9,22 @@ import { checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.
 
 class AdminService {
 
+    async getUserById(userId, token) {
+        const { _id } = checkAuth(token);
+        const user = await findUserById(_id);
+
+        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
+            const user = await UserModel.findOne({ _id: userId });
+            if (!user) {
+                throw new GraphQLError("Can't find user")
+            };
+
+            return user;
+        } else {
+            throw new GraphQLError("You haven't appropriate access")
+        }
+    }
+
     async getStatistic(token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
