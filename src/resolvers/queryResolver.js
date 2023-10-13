@@ -12,15 +12,15 @@ const queryResolver = {
 
             return user;
         },
-        getUserById: async (parent, { userId }, contextValue) => {
-            const user = await adminService.getUserById(userId, contextValue.token);
-
-            return user;
-        },
         getFreeDrivers: async (parent, { getFreeDriversInput }, contextValue) => {
             const drivers = await userService.getFreeDrivers(getFreeDriversInput);
 
             return drivers;
+        },
+        getDriverWithRating: async (parent, { driverId }, contextValue) => {
+            const { rating, driver } = await adminService.getDriverWithRating(driverId, contextValue.token);
+
+            return { rating, driver };
         },
 
         getReviewsByDriverId: async (parent, { getReviewsByDriverIdInput }, contextValue) => {

@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { GraphQLError } from 'graphql';
 
 import AdvertisementModel from '../models/Advertisement.js';
@@ -9,17 +10,27 @@ import { checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.
 
 class AdminService {
 
-    async getUserById(userId, token) {
+    async getDriverWithRating(driverId, token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
 
         if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const user = await UserModel.findOne({ _id: userId });
-            if (!user) {
+            const driver = await UserModel.findOne({ _id: driverId });
+            if (!driver) {
                 throw new GraphQLError("Can't find user")
             };
 
-            return user;
+            const driverRating = await ReviewModel
+                .aggregate()
+                .match({ driverId: new Types.ObjectId(driverId) })
+                .group({
+                    _id: '$driverId',
+                    totalCount: { $sum: 1 },
+                    avgRating: { $avg: '$rating' },
+                });
+            const rating = Math.round(driverRating[0]?.avgRating * 10) / 10 || 0;
+
+            return { driver, rating };
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }

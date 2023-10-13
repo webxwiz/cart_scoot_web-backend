@@ -54,6 +54,10 @@ export const userTypeDefs = `#graphql
         driver: Driver
         rating: Float
     }
+    type UserWithRating {
+        driver: User
+        rating: Float
+    }
     type ResetPasswordTypes {
         token: String
         expire: Date
@@ -175,8 +179,8 @@ export const userTypeDefs = `#graphql
 
     type Query {
         getUserByToken: User        
-        getUserById(userId: ID!): User        
         getFreeDrivers(getFreeDriversInput: GetFreeDriversInput): [DriverWithRating]
+        getDriverWithRating(driverId: ID!): UserWithRating        
  
         getStatistic: Statistic
         getAllDrivers(getAllUsersInput: GetAllUsersInput): UsersWithPagination
