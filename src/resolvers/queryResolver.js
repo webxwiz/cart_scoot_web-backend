@@ -38,6 +38,11 @@ const queryResolver = {
 
             return { avgRating, totalCount };
         },
+        getReviewByRequestCode: async (parent, { requestCode }, contextValue) => {
+            const review = await adminService.getReviewByRequestCode(requestCode, contextValue.token);
+
+            return review;
+        },
 
         getRequest: async (parent, { id }, contextValue) => {
             const { request, avgRating } = await requestService.getRequest(id, contextValue.token);

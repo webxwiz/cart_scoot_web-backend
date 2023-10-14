@@ -341,6 +341,23 @@ class AdminService {
             throw new GraphQLError("You haven't appropriate access")
         }
     }
+
+    async getReviewByRequestCode(requestCode, token) {
+        const { _id } = checkAuth(token);
+        const user = await findUserById(_id);
+
+        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
+
+        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
+            const review = await ReviewModel.findOne({ requestCode })
+                .populate({ path: 'createdBy', select: userPopulatedFields })
+                .populate({ path: 'driverId', select: userPopulatedFields });
+
+            return review;
+        } else {
+            throw new GraphQLError("You haven't appropriate access")
+        }
+    }
 }
 
 export default new AdminService;
