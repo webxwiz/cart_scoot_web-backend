@@ -320,23 +320,22 @@ class AdminService {
             const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
             const itemsOnPage = 7;
 
-            const reviews = await ReviewModel
-                .aggregate()
-                .match({
-                    createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-                })
-                .facet({
-                    data: [
-                        { $sort: { createdAt: -1 } },
-                        { $limit: itemsOnPage * validatePageNumber }
-                    ],
-                    totalCount: [
-                        { $count: "count" }
-                    ]
-                })
+            const userPopulatedFields = ['_id', 'userName', 'avatarURL', 'phone'];
 
-            return { reviews: reviews[0]?.data, totalCount: reviews[0]?.totalCount[0]?.count };
+            const reviews = await ReviewModel.find({
+                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+            })
+            .sort({ createdAt: -1 })
+            .limit(itemsOnPage * validatePageNumber)
+            .populate({ path: 'createdBy', select: userPopulatedFields });
+
+            const totalCount = (await ReviewModel.find({
+                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+            })).length;
+            
+            return { reviews, totalCount }
         } else {
             throw new GraphQLError("You haven't appropriate access")
         }

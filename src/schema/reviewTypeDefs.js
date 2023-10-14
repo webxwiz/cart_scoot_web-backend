@@ -18,6 +18,15 @@ export const reviewTypeDefs = `#graphql
         rating: Int
         requestCode: String
     }
+    type ReviewWithRiderPopulatedFields {
+        _id: ID
+        createdAt: Date
+        createdBy: PopulatedUserFields
+        driverId: ID
+        text: String
+        rating: Int
+        requestCode: String
+    }
     type PopulatedUserFields {
         _id: ID
         userName: String
@@ -28,7 +37,7 @@ export const reviewTypeDefs = `#graphql
         avgRating: Float
     }
     type ReviewWithPagination {
-        reviews: [Review]
+        reviews: [ReviewWithRiderPopulatedFields]
         totalCount: Int
     }  
     type ReviewWithPaginationAndFields {
