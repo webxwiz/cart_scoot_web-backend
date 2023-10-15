@@ -69,8 +69,8 @@ const queryResolver = {
 
             return requests;
         },
-        getActiveRequestsAmount: async (parent, args, contextValue) => {
-            const requestsAmount = await requestService.getActiveRequestsAmount(contextValue.token);
+        getActiveRequestsAmount: async (parent, { userId }, contextValue) => {
+            const requestsAmount = await requestService.getActiveRequestsAmount(userId);
 
             return requestsAmount;
         },

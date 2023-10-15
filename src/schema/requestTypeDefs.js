@@ -158,7 +158,7 @@ export const requestTypeDefs = `#graphql
         getRequestsByDriver(getRequestsByFiltersInput: GetRequestsByFiltersInput): RequestsByDriverWithPagination
 
         getPendingRequests: [RequestWithRiderPopulatedFields]
-        getActiveRequestsAmount: RequestsAmount
+        getActiveRequestsAmount(userId: ID): RequestsAmount
     }
     type Mutation {
         createOneDriverRequest(createOneDriverRequestInput: CreateOneDriverRequestInput): CreateDriversRequestAnswer

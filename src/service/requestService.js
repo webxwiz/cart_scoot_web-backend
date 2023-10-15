@@ -373,21 +373,22 @@ class RequestService {
         return requests;
     }
 
-    async getActiveRequestsAmount(token) {
-        const { _id } = checkAuth(token);
+    async getActiveRequestsAmount(userId) {
 
-        const requestsAmount = await RequestModel
-            .aggregate()
-            .match({
-                userId: new Types.ObjectId(_id),
-                status: { $in: ['ACTIVE', 'APPROVED'] }
-            })
-            .group({
-                _id: '$userId',
-                totalCount: { $sum: 1 },
-            });
-
-        return { requestAmount: requestsAmount[0]?.totalCount };
+        if (userId) {
+            const requestsAmount = await RequestModel
+                .aggregate()
+                .match({
+                    userId: new Types.ObjectId(userId),
+                    status: { $in: ['ACTIVE', 'APPROVED'] }
+                })
+                .group({
+                    _id: '$userId',
+                    totalCount: { $sum: 1 },
+                });
+    
+            return { requestAmount: requestsAmount[0]?.totalCount };
+        } else return { requestAmount: null };
     }
 }
 
