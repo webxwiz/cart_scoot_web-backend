@@ -69,6 +69,11 @@ const queryResolver = {
 
             return requests;
         },
+        getActiveRequestsAmount: async (parent, args, contextValue) => {
+            const requestsAmount = await requestService.getActiveRequestsAmount(contextValue.token);
+
+            return requestsAmount;
+        },
 
         getStatistic: async (parent, args, contextValue) => {
             const { totalRiders, totalDrivers, totalTrips } = await adminService.getStatistic(contextValue.token);

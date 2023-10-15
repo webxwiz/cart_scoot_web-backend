@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { Types } from 'mongoose';
 
 import { GraphQLError } from 'graphql';
 
@@ -370,6 +371,23 @@ class RequestService {
             .populate({ path: 'userId', select: userPopulatedFields });
 
         return requests;
+    }
+
+    async getActiveRequestsAmount(token) {
+        const { _id } = checkAuth(token);
+
+        const requestsAmount = await RequestModel
+            .aggregate()
+            .match({
+                userId: new Types.ObjectId(_id),
+                status: { $in: ['ACTIVE', 'APPROVED'] }
+            })
+            .group({
+                _id: '$userId',
+                totalCount: { $sum: 1 },
+            });
+
+        return { requestAmount: requestsAmount[0]?.totalCount };
     }
 }
 

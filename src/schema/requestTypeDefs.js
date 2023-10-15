@@ -101,6 +101,9 @@ export const requestTypeDefs = `#graphql
         requests: [RequestWithRiderPopulatedFields]
         totalCount: Int
     }
+    type RequestsAmount {
+        requestAmount: Int
+    }
 
     input GetRequestsByFiltersInput {
         page: Int
@@ -155,6 +158,7 @@ export const requestTypeDefs = `#graphql
         getRequestsByDriver(getRequestsByFiltersInput: GetRequestsByFiltersInput): RequestsByDriverWithPagination
 
         getPendingRequests: [RequestWithRiderPopulatedFields]
+        getActiveRequestsAmount: RequestsAmount
     }
     type Mutation {
         createOneDriverRequest(createOneDriverRequestInput: CreateOneDriverRequestInput): CreateDriversRequestAnswer
