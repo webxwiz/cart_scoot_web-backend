@@ -64,8 +64,8 @@ const queryResolver = {
 
             return { requests, totalCount };
         },
-        getPendingRequests: async (parent, args, contextValue) => {
-            const requests = await requestService.getAllRequestsByStatus('PENDING', contextValue.token);
+        getPendingRequestsByDriver: async (parent, args, contextValue) => {
+            const requests = await requestService.getPendingRequestsByDriver('PENDING', contextValue.token);
 
             return requests;
         },

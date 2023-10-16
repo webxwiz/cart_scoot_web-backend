@@ -362,12 +362,12 @@ class RequestService {
         } else return request;
     }
 
-    async getAllRequestsByStatus(status, token) {
+    async getPendingRequestsByDriver(status, token) {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
         const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
-        const requests = await RequestModel.find({ status })
+        const requests = await RequestModel.find({ status, driverId: _id })
             .populate({ path: 'userId', select: userPopulatedFields });
 
         return requests;
