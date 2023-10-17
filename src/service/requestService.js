@@ -153,9 +153,9 @@ class RequestService {
             workingDays: { $in: dayOfWeek },
             'workingTime.from': { $lte: time },
             'workingTime.to': { $gt: time },
-        });
-        const driverEmails = driverArray.map(user => user.email).filter(phone => phone !== undefined || null);
-        const driverPhones = driverArray.map(user => user.phone?.number).filter(phone => phone !== undefined || null);
+        }, { email: 1, phone: 1 });
+        const driverEmails = driverArray.map(user => user?.email).filter(email => email !== undefined || null);
+        const driverPhones = driverArray.map(user => user?.phone).filter(phone => (phone?.number !== undefined || null) && (phone?.confirmed === true));
 
         const firstPart = crypto.randomBytes(3).toString('hex');
         const secondPart = crypto.randomBytes(2).toString('hex');
@@ -171,8 +171,8 @@ class RequestService {
 
         let smsStatuses = [];
         if (driverPhones.length) {
-            for (const number of driverPhones) {
-                const status = await smsSender(`Your have common request ${request.requestCode}`, number);
+            for (const phone of driverPhones) {
+                const status = await smsSender(`Your have common request ${request.requestCode}`, phone?.number);
                 smsStatuses.push(status);
             }
         }
@@ -197,7 +197,6 @@ class RequestService {
             };
         }
         const successEmailsCount = emailStatuses.map(item => item === 202);
-
         const totalDrivers = smsStatuses.length + successEmailsCount.length;
 
         return {
@@ -386,7 +385,7 @@ class RequestService {
                     _id: '$userId',
                     totalCount: { $sum: 1 },
                 });
-    
+
             return { requestAmount: requestsAmount[0]?.totalCount };
         } else return { requestAmount: null };
     }
