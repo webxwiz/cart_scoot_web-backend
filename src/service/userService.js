@@ -309,9 +309,15 @@ class UserService {
                 'workingTime.from': { $lte: time },
                 'workingTime.to': { $gt: time },
                 role: 'DRIVER',
+                'license.status': 'APPROVED',
+                banned: { $ne: true },
             });
         } else {
-            drivers = await UserModel.find({ role: 'DRIVER' });
+            drivers = await UserModel.find({
+                role: 'DRIVER',
+                'license.status': 'APPROVED',
+                banned: { $ne: true },
+            });
         }
 
         const driverIds = drivers.map(driver => driver._id);
