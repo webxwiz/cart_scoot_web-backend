@@ -153,6 +153,9 @@ class RequestService {
             workingDays: { $in: dayOfWeek },
             'workingTime.from': { $lte: time },
             'workingTime.to': { $gt: time },
+            role: 'DRIVER',
+            'license.status': 'APPROVED',
+            banned: { $ne: true },
         }, { email: 1, phone: 1 });
         const driverEmails = driverArray.map(user => user?.email).filter(email => email !== undefined || null);
         const driverPhones = driverArray.map(user => user?.phone).filter(phone => (phone?.number !== undefined || null) && (phone?.confirmed === true));
@@ -366,7 +369,7 @@ class RequestService {
         await findUserById(_id);
 
         const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
-        const requests = await RequestModel.find({ status, driverId: _id })
+        const requests = await RequestModel.find({ status, driverId: { $in: [_id, null] } })
             .populate({ path: 'userId', select: userPopulatedFields });
 
         return requests;
