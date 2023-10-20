@@ -1,20 +1,20 @@
 import { Types } from 'mongoose';
 
 import ReviewModel from '../models/Review.js';
+import RequestModel from '../models/Request.js';
 
 import { checkAuth, findUserById, findUserByIdAndRole, smsSender, mailSender, logger } from '../utils/_index.js';
 
 class ReviewService {
 
-    async addReview(data, token) {
+    async addReview({ driverId, text, rating, requestCode }, token) {
         const { _id } = checkAuth(token);
         await findUserByIdAndRole(_id, 'RIDER');
-        const { driverId } = data;
 
         const { email, phone: { number, confirmed } } = await findUserById(driverId);
 
         if (number && confirmed) {
-            await smsSender(`Your have new review! Your rating ${data.rating}. Message: ${data.text}`, number);
+            await smsSender(`Your have new review! Your rating ${rating}. Message: ${text || ''}`, number);
         } else if (email) {
             await mailSender({
                 to: email,
@@ -22,17 +22,31 @@ class ReviewService {
                 text: 'Your have new review!',
                 html: `
                         <h2>Your have new review!</h2>
-                        <h4>Your rating ${data.rating}</h4>
+                        <h4>Your rating: ${rating}</h4>
                         <p>Message:</p>                      
-                        <p>${data.text}</p>                      
+                        <p>${text || ''}</p>                      
                     `,
             });
         };
 
         const review = await ReviewModel.create({
             createdBy: _id,
-            ...data,
+            driverId,
+            text,
+            rating,
+            requestCode,
         });
+
+        const request = await RequestModel.findOneAndUpdate(
+            { requestCode },
+            {
+                $set: { isReviewed: true }
+            },
+            { new: true },
+        )
+        if (!request) {
+            throw new GraphQLError("Modified forbidden")
+        }
 
         return review;
     }

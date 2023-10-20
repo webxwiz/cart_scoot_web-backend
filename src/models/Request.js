@@ -11,7 +11,10 @@ const requestSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
     },
-    description: String,
+    isReviewed: {
+        type: Boolean,
+        default: false,
+    },
     status: {
         type: String,
         enum: ['PENDING', 'REJECTED', 'APPROVED', 'ACTIVE', 'FINISHED'],

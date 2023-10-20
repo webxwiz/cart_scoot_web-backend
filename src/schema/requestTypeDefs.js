@@ -12,7 +12,7 @@ export const requestTypeDefs = `#graphql
         createdAt: Date
         userId: ID!
         driverId: ID
-        description: String
+        isReviewed: Boolean
         status: statusTypes
         carType: Int
         requestedTime: Date
@@ -26,7 +26,7 @@ export const requestTypeDefs = `#graphql
         createdAt: Date
         userId: ID!
         driverId: UserInRequest
-        description: String
+        isReviewed: Boolean
         status: statusTypes
         carType: Int
         requestedTime: Date
@@ -40,7 +40,7 @@ export const requestTypeDefs = `#graphql
         createdAt: Date
         userId: UserInRequest
         driverId: ID
-        description: String
+        isReviewed: Boolean
         status: statusTypes
         carType: Int
         requestedTime: Date
@@ -54,7 +54,7 @@ export const requestTypeDefs = `#graphql
         createdAt: Date
         userId: UserInRequest
         driverId: UserInRequest
-        description: String
+        isReviewed: Boolean
         status: statusTypes
         carType: Int
         requestedTime: Date
@@ -122,7 +122,6 @@ export const requestTypeDefs = `#graphql
     }
     input CreateOneDriverRequestInput {
         id: ID!
-        description: String
         carType: Int
         requestedTime: Date
         coordinates: CoordinatesInput
@@ -130,7 +129,6 @@ export const requestTypeDefs = `#graphql
         dropoffLocation: String
     }
     input CreateDriversRequestInput {
-        description: String
         carType: Int
         requestedTime: Date
         coordinates: CoordinatesInput
