@@ -56,24 +56,19 @@ class ReviewService {
 
         const validPage = page ? page > 0 ? page : 1 : 1;
         const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
+        const filters = {
+            driverId,
+            createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+            ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+        };
 
-        const reviews = await ReviewModel.find
-            ({
-                driverId,
-                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-            })
+        const reviews = await ReviewModel.find(filters)
             .limit(6 * validPage)
             .sort({ createdAt: -1 })
             .populate({ path: 'createdBy', select: userPopulatedFields })
             .populate({ path: 'driverId', select: userPopulatedFields });
 
-        const totalCount = (await ReviewModel.find
-            ({
-                driverId,
-                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-            })).length;
+        const totalCount = (await ReviewModel.find(filters)).length;
 
         return { reviews, totalCount };
     }

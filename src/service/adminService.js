@@ -6,63 +6,62 @@ import RequestModel from '../models/Request.js';
 import UserModel from '../models/User.js';
 import ReviewModel from '../models/Review.js';
 
-import { checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.js';
+import { checkAuth, findAdminByToken, findUserById, mailSender, smsSender } from '../utils/_index.js';
 
 class AdminService {
 
+    get userPopulatedFields() {
+        return ['_id', 'userName', 'avatarURL', 'phone'];
+    }
+
     async getDriverWithRating(driverId, token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const driver = await UserModel.findOne({ _id: driverId });
-            if (!driver) {
-                throw new GraphQLError("Can't find user")
-            };
+        await findAdminByToken(token);
 
-            const driverRating = await ReviewModel
-                .aggregate()
-                .match({ driverId: new Types.ObjectId(driverId) })
-                .group({
-                    _id: '$driverId',
-                    totalCount: { $sum: 1 },
-                    avgRating: { $avg: '$rating' },
-                });
-            const rating = Math.round(driverRating[0]?.avgRating * 10) / 10 || 0;
-            const totalCount = driverRating[0]?.totalCount;
+        const driver = await UserModel.findOne({ _id: driverId });
+        if (!driver) {
+            throw new GraphQLError("Can't find user")
+        };
 
-            return { driver, rating, totalCount };
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
+        const driverRating = await ReviewModel
+            .aggregate()
+            .match({ driverId: new Types.ObjectId(driverId) })
+            .group({
+                _id: '$driverId',
+                totalCount: { $sum: 1 },
+                avgRating: { $avg: '$rating' },
+            });
+        const rating = Math.round(driverRating[0]?.avgRating * 10) / 10 || 0;
+        const totalCount = driverRating[0]?.totalCount;
+
+        return { driver, rating, totalCount };
     }
 
     async getStatistic(token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const users = await UserModel
-                .aggregate()
-                .group({
-                    _id: '$role',
-                    count: {
-                        $sum: 1,
-                    },
-                });
+        await findAdminByToken(token);
 
-            const totalRiders = users?.find(item => item._id === 'RIDER')?.count || 0;
-            const totalDrivers = users?.find(item => item._id === 'DRIVER')?.count || 0;
+        const users = await UserModel
+            .aggregate()
+            .group({
+                _id: '$role',
+                count: {
+                    $sum: 1,
+                },
+            });
 
-            const totalTrips = await RequestModel.countDocuments();
+        const totalRiders = users?.find(item => item._id === 'RIDER')?.count || 0;
+        const totalDrivers = users?.find(item => item._id === 'DRIVER')?.count || 0;
 
-            return { totalRiders, totalDrivers, totalTrips }
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
+        const totalTrips = await RequestModel.countDocuments();
+
+        return { totalRiders, totalDrivers, totalTrips }
     }
 
     async getAllAdvertisement() {
+
+        await findAdminByToken(token);
+
         const advertisements = await AdvertisementModel.find().sort({ createdAt: -1 });
         if (advertisements) {
             throw new GraphQLError("Can't find any advertisements")
@@ -72,34 +71,27 @@ class AdminService {
     }
 
     async addAdvertisement(data, token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const advertisement = await AdvertisementModel.create({
-                ...data,
-            });
-            if (!advertisement) {
-                throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
-            }
+        await findAdminByToken(token);
 
-            return advertisement;
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
+        const advertisement = await AdvertisementModel.create({
+            ...data,
+        });
+        if (!advertisement) {
+            throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
         }
+
+        return advertisement;
     }
 
     async deleteAdvertisement(id, token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const advertisementStatus = await AdvertisementModel.deleteOne({ _id: id });
+        await findAdminByToken(token);
 
-            return advertisementStatus;
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
+        const advertisementStatus = await AdvertisementModel.deleteOne({ _id: id });
+
+        return advertisementStatus;
+
     }
 
     async changeUserRole({ id, role }, token) {
@@ -134,25 +126,21 @@ class AdminService {
     }
 
     async answerDriverLicense({ driverId, answer }, token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
+
+        await findAdminByToken(token);
 
         const status = answer ? 'APPROVED' : 'REJECTED';
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const updatedUser = await UserModel.findOneAndUpdate(
-                { _id: driverId },
-                {
-                    $set: { 'license.status': status }
-                },
-                { new: true },
-            );
-            if (!updatedUser) {
-                throw new GraphQLError("Modified forbidden")
-            } else return updatedUser
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
+        const updatedUser = await UserModel.findOneAndUpdate(
+            { _id: driverId },
+            {
+                $set: { 'license.status': status }
+            },
+            { new: true },
+        );
+        if (!updatedUser) {
+            throw new GraphQLError("Modified forbidden")
+        } else return updatedUser
     }
 
     async sendBannedInfo(_id, banned) {
@@ -230,132 +218,101 @@ class AdminService {
     }
 
     async getProfilesByRole(role, { pageNumber, searchUserName, status }, token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
-            const itemsOnPage = 7;
+        await findAdminByToken(token);
 
-            const users = await UserModel
-                .aggregate()
-                .match({
-                    role,
-                    ...(status && { "license.status": status }),
-                    ...(searchUserName && { userName: { $regex: searchUserName, $options: 'i' } }),
-                })
-                .facet({
-                    data: [
-                        { $sort: { createdAt: -1 } },
-                        { $limit: itemsOnPage * validatePageNumber }
-                    ],
-                    totalCount: [
-                        { $count: "count" }
-                    ]
-                })
-            if (!users) {
-                throw new GraphQLError("Can't find any users")
-            };
+        const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
+        const itemsOnPage = 7;
 
-            return { users: users[0]?.data, totalCount: users[0]?.totalCount[0]?.count };
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
+        const users = await UserModel
+            .aggregate()
+            .match({
+                role,
+                ...(status && { "license.status": status }),
+                ...(searchUserName && { userName: { $regex: searchUserName, $options: 'i' } }),
+            })
+            .facet({
+                data: [
+                    { $sort: { createdAt: -1 } },
+                    { $limit: itemsOnPage * validatePageNumber }
+                ],
+                totalCount: [
+                    { $count: "count" }
+                ]
+            })
+        if (!users) {
+            throw new GraphQLError("Can't find any users")
+        };
+
+        return { users: users[0]?.data, totalCount: users[0]?.totalCount[0]?.count };
     }
 
     async getAllRequests({ pageNumber, itemsOnPage, searchRequestCode, dateFrom, dateTo, status }, token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
-            const validItemsOnPage = itemsOnPage > 0 ? itemsOnPage : 7;
+        await findAdminByToken(token);
 
-            const userPopulatedFields = ['_id', 'userName', 'avatarURL', 'phone'];
+        const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
+        const validItemsOnPage = itemsOnPage > 0 ? itemsOnPage : 7;
 
-            const requests = await RequestModel
-                .find({
-                    createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                    ...(status && { status }),
-                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-                })
-                .sort({ createdAt: -1 })
-                .limit(validItemsOnPage * validatePageNumber)
-                .populate({ path: 'userId', select: userPopulatedFields })
-                .populate({ path: 'driverId', select: userPopulatedFields });
-
-            const totalCount = (await RequestModel
-                .find({
-                    createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                    ...(status && { status }),
-                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-                })).length;
-
-            return { requests, totalCount };
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
+        const filters = {
+            createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+            ...(status && { status }),
+            ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
         }
+
+        const requests = await RequestModel.find(filters)
+            .sort({ createdAt: -1 })
+            .limit(validItemsOnPage * validatePageNumber)
+            .populate({ path: 'userId', select: this.userPopulatedFields })
+            .populate({ path: 'driverId', select: this.userPopulatedFields });
+
+        const totalCount = (await RequestModel.find(filters)).length;
+
+        return { requests, totalCount };
     }
 
     async getWaitingLicenses(token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const users = await UserModel.find({
-                'license.status': 'WAITING',
-            }).sort({ createdAt: -1 });
+        await findAdminByToken(token);
 
-            return users;
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
+        const users = await UserModel.find({
+            'license.status': 'WAITING',
+        }).sort({ createdAt: -1 });
+
+        return users;
     }
 
     async getAllReviews({ pageNumber, searchRequestCode, dateFrom, dateTo }, token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
-            const itemsOnPage = 7;
+        await findAdminByToken(token);
 
-            const userPopulatedFields = ['_id', 'userName', 'avatarURL', 'phone'];
+        const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
+        const itemsOnPage = 7;
 
-            const reviews = await ReviewModel.find({
-                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-            })
+        const filters = {
+            createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
+            ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+        }
+
+        const reviews = await ReviewModel.find(filters)
             .sort({ createdAt: -1 })
             .limit(itemsOnPage * validatePageNumber)
-            .populate({ path: 'createdBy', select: userPopulatedFields });
+            .populate({ path: 'createdBy', select: this.userPopulatedFields });
 
-            const totalCount = (await ReviewModel.find({
-                createdAt: { $gte: new Date(dateFrom || '2020-12-17T03:24:00'), $lte: new Date(dateTo || Date.now()) },
-                    ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-            })).length;
-            
-            return { reviews, totalCount }
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
+        const totalCount = (await ReviewModel.find(filters)).length;
+
+        return { reviews, totalCount }
     }
 
     async getReviewByRequestCode(requestCode, token) {
-        const { _id } = checkAuth(token);
-        const user = await findUserById(_id);
 
-        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
+        await findAdminByToken(token);
 
-        if (user.role === 'ADMIN' || user.role === 'SUBADMIN') {
-            const review = await ReviewModel.findOne({ requestCode })
-                .populate({ path: 'createdBy', select: userPopulatedFields })
-                .populate({ path: 'driverId', select: userPopulatedFields });
+        const review = await ReviewModel.findOne({ requestCode })
+            .populate({ path: 'createdBy', select: this.userPopulatedFields })
+            .populate({ path: 'driverId', select: this.userPopulatedFields });
 
-            return review;
-        } else {
-            throw new GraphQLError("You haven't appropriate access")
-        }
+        return review;
     }
 }
 
