@@ -48,8 +48,6 @@ class RequestService {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
-        await this.changeStatusOfOutdatedRequests();
-
         const validPage = page ? page > 0 ? page : 1 : 1;
         const filters = {
             userId: _id,
