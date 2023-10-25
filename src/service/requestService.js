@@ -12,14 +12,17 @@ import { checkAuth, findUserById, findUserByIdAndRole, mailSender, smsSender } f
 
 class RequestService {
 
+    get userPopulatedFields() {
+        return ['_id', 'userName', 'avatarURL', 'phone'];
+    }
+
     async getRequest(id, token) {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
-        const userPopulatedFields = ['_id', 'userName', 'avatarURL', 'phone'];
         const request = await RequestModel.findById(id)
-            .populate({ path: 'driverId', select: userPopulatedFields })
-            .populate({ path: 'userId', select: userPopulatedFields });
+            .populate({ path: 'driverId', select: this.userPopulatedFields })
+            .populate({ path: 'userId', select: this.userPopulatedFields });
         if (!request) {
             throw new GraphQLError("Can't find request")
         };
@@ -45,26 +48,22 @@ class RequestService {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
+        await this.changeStatusOfOutdatedRequests();
+
         const validPage = page ? page > 0 ? page : 1 : 1;
-        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
-        const requests = await RequestModel.find
-            ({
-                userId: _id,
-                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
-                ...(status && { status }),
-                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-            })
+        const filters = {
+            userId: _id,
+            createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
+            ...(status && { status }),
+            ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+        };
+
+        const requests = await RequestModel.find(filters)
             .limit(6 * validPage)
             .sort({ createdAt: -1 })
-            .populate({ path: 'driverId', select: userPopulatedFields });
+            .populate({ path: 'driverId', select: this.userPopulatedFields });
 
-        const totalCount = (await RequestModel.find
-            ({
-                userId: _id,
-                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
-                ...(status && { status }),
-                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-            })).length
+        const totalCount = (await RequestModel.find(filters)).length;
 
         return { requests, totalCount };
     }
@@ -75,25 +74,19 @@ class RequestService {
         await findUserById(_id);
 
         const validPage = page ? page > 0 ? page : 1 : 1;
-        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
-        const requests = await RequestModel.find
-            ({
-                driverId: _id,
-                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
-                ...(status && { status }),
-                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-            })
+        const filters = {
+            driverId: _id,
+            createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
+            ...(status && { status }),
+            ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
+        }
+
+        const requests = await RequestModel.find(filters)
             .limit(6 * validPage)
             .sort({ createdAt: -1 })
-            .populate({ path: 'userId', select: userPopulatedFields });
+            .populate({ path: 'userId', select: this.userPopulatedFields });
 
-        const totalCount = (await RequestModel.find
-            ({
-                driverId: _id,
-                createdAt: { $gte: dateFrom || new Date('2020-12-17T03:24:00').toJSON(), $lte: dateTo || Date.now() },
-                ...(status && { status }),
-                ...(searchRequestCode && { requestCode: { $regex: searchRequestCode, $options: 'i' } }),
-            })).length
+        const totalCount = (await RequestModel.find(filters)).length
 
         return { requests, totalCount };
     }
@@ -368,9 +361,8 @@ class RequestService {
         const { _id } = checkAuth(token);
         await findUserById(_id);
 
-        const userPopulatedFields = ['_id', 'userName', 'avatarURL'];
         const requests = await RequestModel.find({ status, driverId: { $in: [_id, null] } })
-            .populate({ path: 'userId', select: userPopulatedFields });
+            .populate({ path: 'userId', select: this.userPopulatedFields });
 
         return requests;
     }
@@ -391,6 +383,99 @@ class RequestService {
 
             return { requestAmount: requestsAmount[0]?.totalCount };
         } else return { requestAmount: null };
+    }
+
+    async changeStatusOfOutdatedRequests() {
+
+        const userPopulatedFields = ['userName', 'email', 'phone'];
+
+        const activeOutdatedFilters = {
+            status: { $in: ['ACTIVE'] },
+            requestedTime: { $lt: Date.now() - (3600 * 1000 * 24) }
+        };
+        const pendingOutdatedFilters = {
+            status: { $in: ['PENDING'] },
+            requestedTime: { $lt: Date.now() }
+        };
+        const approvedOutdatedFilters = {
+            status: { $in: ['APPROVED'] },
+            updatedAt: { $lt: Date.now() - (3600 * 1000 * 24) }
+        };
+
+        const activeOutdatedRequests = await RequestModel
+            .find(activeOutdatedFilters)
+            .populate({ path: 'userId', select: userPopulatedFields });
+
+        for (const request of activeOutdatedRequests) {
+            if (request.userId?.phone?.number && request.userId?.phone?.confirmed) {
+                await smsSender(`The request ${request.requestCode} change status to Finished because request time is expired`, request.userId.phone.number);
+            } else if (request.userId?.email) {
+                await mailSender({
+                    to: request.userId.email,
+                    subject: 'Request status',
+                    text: `The request ${request.requestCode} change status to Finished because request time is expired`,
+                    html: `
+                        <h2>The request ${request.requestCode} change status to Finished because request time is expired</h2>                        
+                    `,
+                });
+            }
+        }
+        await RequestModel.updateMany(
+            activeOutdatedFilters,
+            {
+                $set: { status: "FINISHED" }
+            },
+        );
+
+        const pendingOutdatedRequests = await RequestModel
+            .find(pendingOutdatedFilters)
+            .populate({ path: 'userId', select: userPopulatedFields });
+
+        for (const request of pendingOutdatedRequests) {
+            if (request.userId?.phone?.number) {
+                await smsSender(`The request ${request.requestCode} change status to Rejected because request time is expired`, request.userId.phone.number);
+            } else if (request.userId?.email) {
+                await mailSender({
+                    to: request.userId.email,
+                    subject: 'Request status',
+                    text: `The request ${request.requestCode} change status to Rejected because request time is expired`,
+                    html: `
+                        <h2>The request ${request.requestCode} change status to Rejected because request time is expired</h2>                        
+                    `,
+                });
+            }
+        }
+        await RequestModel.updateMany(
+            pendingOutdatedFilters,
+            {
+                $set: { status: "REJECTED" }
+            },
+        );
+
+        const approvedOutdatedRequests = await RequestModel
+            .find(approvedOutdatedFilters)
+            .populate({ path: 'userId', select: userPopulatedFields });
+
+        for (const request of approvedOutdatedRequests) {
+            if (request.userId?.phone?.number) {
+                await smsSender(`The request ${request.requestCode} change status to Pending because request has not been approved by rider`, request.userId.phone.number);
+            } else if (request.userId?.email) {
+                await mailSender({
+                    to: request.userId.email,
+                    subject: 'Request status',
+                    text: `The request ${request.requestCode} change status to Pending because request has not been approved by rider`,
+                    html: `
+                        <h2>The request ${request.requestCode} change status to Pending because request has not been approved by rider</h2>                        
+                    `,
+                });
+            }
+        }
+        await RequestModel.updateMany(
+            approvedOutdatedFilters,
+            {
+                $set: { status: "PENDING", driverId: null }
+            },
+        );
     }
 }
 

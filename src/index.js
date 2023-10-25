@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import cors from 'cors';
 import http from 'http';
 
+import schedule from 'node-schedule';
+
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
@@ -18,6 +20,7 @@ import { logger } from './utils/_index.js';
 import router from './router/router.js';
 
 import 'dotenv/config';
+import requestService from "./service/requestService.js";
 
 mongoose
     .connect(process.env.MONGO_DB)
@@ -72,6 +75,11 @@ app.use('/graphql', cors(),
         },
     }),
 );
+
+// schedule.scheduleJob('22 * * * *', async function () {
+//     await requestService.changeStatusOfOutdatedRequests()
+// });
+
 
 app.use(errorHandler);
 

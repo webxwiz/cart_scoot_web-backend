@@ -7,4 +7,5 @@ export { logger } from './winstonLogger.js';
 export { resizeOneImage } from './resizeOneImage.js';
 export { findUserById } from './findUserById.js';
 export { findUserByIdAndRole } from './findUserByIdAndRole.js';
+export { findAdminByToken } from './findAdminByToken.js';
 export { smsSender } from './smsSender.js';
