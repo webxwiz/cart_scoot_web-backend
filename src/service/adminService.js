@@ -58,12 +58,11 @@ class AdminService {
         return { totalRiders, totalDrivers, totalTrips }
     }
 
-    async getAllAdvertisement() {
-
+    async getAllAdvertisements(token) {
         await findAdminByToken(token);
 
         const advertisements = await AdvertisementModel.find().sort({ createdAt: -1 });
-        if (advertisements) {
+        if (!advertisements) {
             throw new GraphQLError("Can't find any advertisements")
         };
 
