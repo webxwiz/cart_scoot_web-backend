@@ -7,3 +7,11 @@ export const resizeOneImage = async (buffer, size) => {
         .webp()
         .toBuffer()
 }
+
+export const oneImageToWebp = async (buffer) => {
+
+    return await sharp(buffer)
+        .webp()
+        .toBuffer()
+}
+

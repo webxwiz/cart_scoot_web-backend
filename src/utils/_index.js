@@ -4,7 +4,7 @@ export { checkAuth } from './checkAuth.js';
 export { mailSender } from './mailSender.js';
 export { multerConfig } from './multerConfig.js';
 export { logger } from './winstonLogger.js';
-export { resizeOneImage } from './resizeOneImage.js';
+export { resizeOneImage, oneImageToWebp } from './resizeOneImage.js';
 export { findUserById } from './findUserById.js';
 export { findUserByIdAndRole } from './findUserByIdAndRole.js';
 export { findAdminByToken } from './findAdminByToken.js';

@@ -343,7 +343,8 @@ class UserService {
     }
 
     async getPageAdvertisement(position) {
-        const advertisement = await AdvertisementModel.find({ position })
+        const advertisement = await AdvertisementModel.find(
+            { position, from: { $lte: Date.now() }, to: { $gte: Date.now() } })
             .sort({ updatedAt: -1 })
             .limit(1);
         if (!advertisement) {

@@ -3,7 +3,7 @@ import { basename } from 'path';
 
 import { Router } from "express";
 
-import { multerConfig, resizeOneImage } from '../utils/_index.js';
+import { multerConfig, resizeOneImage, oneImageToWebp } from '../utils/_index.js';
 
 import uploadService from "../service/uploadService.js";
 import awsS3Service from "../service/awsS3Service.js";
@@ -18,7 +18,7 @@ router.post('/avatar',
     async function (req, res, next) {
         try {
             const partName = crypto.randomBytes(1).toString('hex');
-            const fileName = `avatars/${req.userId}-${partName}-avatar.webp`
+            const fileName = `avatars/${req.userId}-${partName}-avatar.webp`;
             const image = await resizeOneImage(req.file.buffer, 100);
             const avatarURL = await awsS3Service.uploadImageToS3(image, fileName);
             const user = await uploadService.uploadAvatarUrl(req.userId, avatarURL);
@@ -98,6 +98,26 @@ router.delete('/license',
                 deleteMarker,
                 user: updatedUser,
                 message: `${deleteMarker.length} images successfully deleted.`,
+            });
+        } catch (error) {
+            next(error)
+        }
+    },
+);
+
+router.post('/advertisement',
+    authMiddleware,
+    multerConfig.single('advertisement'),
+    async function (req, res, next) {
+        try {
+            const partName = crypto.randomBytes(6).toString('hex');
+            const fileName = `advertisement/${partName}-ads.webp`;
+            const image = await oneImageToWebp(req.file.buffer)
+            const advertisementURL = await awsS3Service.uploadImageToS3(image, fileName);
+
+            res.json({
+                advertisementURL,
+                message: "Advertisement successfully uploaded.",
             });
         } catch (error) {
             next(error)
