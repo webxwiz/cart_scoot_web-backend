@@ -8,7 +8,11 @@ const advertisementSchema = new Schema({
     link: String,
     from: Date,
     to: Date,
-    position: [String],
+    position: {
+        type: String,
+        enum: ['MAIN', 'MAP', 'TRIP'],
+        default: 'MAIN',
+    },
 },
     {
         timestamps: true,

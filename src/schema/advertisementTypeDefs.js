@@ -1,5 +1,10 @@
 export const advertisementTypeDefs = `#graphql
-    scalar Date    
+    scalar Date
+    enum PageTypes {
+        MAIN
+        MAP
+        TRIP
+    }   
     type Advertisement {
         _id: ID!
         createdAt: Date
@@ -9,7 +14,7 @@ export const advertisementTypeDefs = `#graphql
         link: String
         from: Date
         to: Date
-        position: [String]
+        position: PageTypes
     }
     type AdvertisementDeleteResponse {        
         AdvertisementStatus: AdvertisementDeleteStatus
@@ -27,11 +32,12 @@ export const advertisementTypeDefs = `#graphql
         link: String
         from: Date
         to: Date
-        position: [String]
+        position: PageTypes
     }
     
     type Query {
-        getAllAdvertisements: [Advertisement]       
+        getAllAdvertisements: [Advertisement]
+        getPageAdvertisement(position: PageTypes): Advertisement      
     }
     type Mutation {
         addAdvertisement(addAdvertisementInput: AddAdvertisementInput): Advertisement

@@ -101,6 +101,11 @@ const queryResolver = {
 
             return advertisements;
         },
+        getPageAdvertisement: async (parent, { position }, contextValue) => {
+            const advertisement = await userService.getPageAdvertisement(position);
+
+            return advertisement;
+        },
     },
 };
 

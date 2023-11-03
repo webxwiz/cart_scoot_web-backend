@@ -5,6 +5,7 @@ import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
 import ReviewModel from '../models/Review.js';
+import AdvertisementModel from '../models/Advertisement.js';
 
 import { userValidate } from '../validation/userValidation.js';
 import { createPasswordHash, generateToken, checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.js';
@@ -339,6 +340,17 @@ class UserService {
         })
 
         return driverWithRating;
+    }
+
+    async getPageAdvertisement(position) {
+        const advertisement = await AdvertisementModel.find({ position })
+            .sort({ updatedAt: -1 })
+            .limit(1);
+        if (!advertisement) {
+            throw new GraphQLError("Can't get advertisement")
+        }
+
+        return advertisement[0];
     }
 }
 
