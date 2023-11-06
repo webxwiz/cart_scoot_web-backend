@@ -15,6 +15,12 @@ class RequestService {
     get userPopulatedFields() {
         return ['_id', 'userName', 'avatarURL', 'phone'];
     }
+    get requestCode() {
+        const firstPart = crypto.randomBytes(2).toString('hex');
+        const secondPart = crypto.randomBytes(1).toString('hex');
+        const thirdPart = new Date().getFullYear().toString();
+        return `${firstPart}-${secondPart}${thirdPart.slice(2)}`;
+    }
 
     async getRequest(id, token) {
         const { _id } = checkAuth(token);
@@ -94,16 +100,11 @@ class RequestService {
         await findUserByIdAndRole(_id, role);
         const { email, phone: { number, confirmed } } = await findUserById(id);
 
-        const firstPart = crypto.randomBytes(2).toString('hex');
-        const secondPart = crypto.randomBytes(1).toString('hex');
-        const thirdPart = new Date().getFullYear().toString();
-        const requestCode = `${firstPart}-${secondPart}${thirdPart.slice(2)}`;
-
         const request = await RequestModel.create({
             userId: _id,
             driverId: id,
             status: 'PENDING',
-            requestCode,
+            requestCode: this.requestCode,
             ...data
         });
 
@@ -151,15 +152,10 @@ class RequestService {
         const driverEmails = driverArray.map(user => user?.email).filter(email => email !== undefined || null);
         const driverPhones = driverArray.map(user => user?.phone).filter(phone => (phone?.number !== undefined || null) && (phone?.confirmed === true));
 
-        const firstPart = crypto.randomBytes(3).toString('hex');
-        const secondPart = crypto.randomBytes(2).toString('hex');
-        const thirdPart = new Date().getFullYear().toString();
-        const requestCode = `${firstPart}-${secondPart}${thirdPart.slice(2)}`;
-
         const request = await RequestModel.create({
             userId: _id,
             status: 'PENDING',
-            requestCode,
+            requestCode: this.requestCode,
             ...data
         });
 
