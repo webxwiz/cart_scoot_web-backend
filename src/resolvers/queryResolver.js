@@ -101,6 +101,11 @@ const queryResolver = {
 
             return advertisements;
         },
+        getAdvertisementById: async (parent, { adsId }, contextValue) => {
+            const advertisement = await adminService.getAdvertisementById(adsId, contextValue.token);
+
+            return advertisement;
+        },
         getPageAdvertisement: async (parent, { position }, contextValue) => {
             const advertisement = await userService.getPageAdvertisement(position);
 

@@ -37,6 +37,8 @@ export const advertisementTypeDefs = `#graphql
     
     type Query {
         getAllAdvertisements: [Advertisement]
+        getAdvertisementById(adsId: ID!): Advertisement
+
         getPageAdvertisement(position: PageTypes): Advertisement      
     }
     type Mutation {

@@ -69,6 +69,17 @@ class AdminService {
         return advertisements;
     }
 
+    async getAdvertisementById(adsId, token) {
+        await findAdminByToken(token);
+
+        const advertisement = await AdvertisementModel.findById(adsId);
+        if (!advertisement) {
+            throw new GraphQLError("Can't find advertisement")
+        };
+
+        return advertisement;
+    }
+
     async addAdvertisement(data, token) {
 
         await findAdminByToken(token);
