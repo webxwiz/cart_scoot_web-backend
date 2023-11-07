@@ -105,19 +105,19 @@ router.delete('/license',
     },
 );
 
-router.post('/advertisement',
+router.post('/banner',
     authMiddleware,
-    multerConfig.single('advertisement'),
+    multerConfig.single('banner'),
     async function (req, res, next) {
         try {
             const partName = crypto.randomBytes(6).toString('hex');
-            const fileName = `advertisement/${partName}-ads.webp`;
+            const fileName = `banners/${partName}-banner.webp`;
             const image = await oneImageToWebp(req.file.buffer)
-            const advertisementURL = await awsS3Service.uploadImageToS3(image, fileName);
+            const imageURL = await awsS3Service.uploadImageToS3(image, fileName);
 
             res.json({
-                advertisementURL,
-                message: "Advertisement successfully uploaded.",
+                imageURL,
+                message: "Banner successfully uploaded.",
             });
         } catch (error) {
             next(error)
