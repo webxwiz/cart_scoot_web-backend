@@ -58,15 +58,28 @@ class AdminService {
         return { totalRiders, totalDrivers, totalTrips }
     }
 
-    async getAllAdvertisements(token) {
+    async getAllAdvertisements(pageNumber, token) {
         await findAdminByToken(token);
 
-        const advertisements = await AdvertisementModel.find().sort({ createdAt: -1 });
+        const validatePageNumber = pageNumber > 0 ? pageNumber : 1;
+        const itemsOnPage = 7;
+
+        const advertisements = await AdvertisementModel
+            .aggregate()
+            .facet({
+                data: [
+                    { $sort: { createdAt: -1 } },
+                    { $limit: itemsOnPage * validatePageNumber }
+                ],
+                totalCount: [
+                    { $count: "count" }
+                ]
+            })
         if (!advertisements) {
             throw new GraphQLError("Can't find any advertisements")
         };
 
-        return advertisements;
+        return { advertisements: advertisements[0]?.data, totalCount: advertisements[0]?.totalCount[0]?.count };
     }
 
     async getAdvertisementById(adsId, token) {

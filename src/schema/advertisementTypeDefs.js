@@ -24,6 +24,10 @@ export const advertisementTypeDefs = `#graphql
         acknowledged: Boolean
         deletedCount: Int
     }
+    type AdvertisementsWithLimit {
+        advertisements: [Advertisement]
+        totalCount: Int
+    }
 
     input AddAdvertisementInput {
         title: String
@@ -36,7 +40,7 @@ export const advertisementTypeDefs = `#graphql
     }
     
     type Query {
-        getAllAdvertisements: [Advertisement]
+        getAllAdvertisements(pageNumber: Int): AdvertisementsWithLimit
         getAdvertisementById(adsId: ID!): Advertisement
 
         getPageAdvertisement(position: PageTypes): Advertisement      

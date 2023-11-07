@@ -96,10 +96,10 @@ const queryResolver = {
 
             return users;
         },
-        getAllAdvertisements: async (parent, args, contextValue) => {
-            const advertisements = await adminService.getAllAdvertisements(contextValue.token);
+        getAllAdvertisements: async (parent, { pageNumber }, contextValue) => {
+            const { advertisements, totalCount } = await adminService.getAllAdvertisements(pageNumber, contextValue.token);
 
-            return advertisements;
+            return { advertisements, totalCount };
         },
         getAdvertisementById: async (parent, { adsId }, contextValue) => {
             const advertisement = await adminService.getAdvertisementById(adsId, contextValue.token);
