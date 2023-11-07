@@ -94,7 +94,6 @@ class AdminService {
     }
 
     async addAdvertisement(data, token) {
-
         await findAdminByToken(token);
 
         const advertisement = await AdvertisementModel.create({
@@ -105,6 +104,21 @@ class AdminService {
         }
 
         return advertisement;
+    }
+
+    async updateAdvertisement({ _id, data }, token) {
+        await findAdminByToken(token);
+
+        const updatedAds = await AdvertisementModel.findOneAndUpdate(
+            { _id },
+            {
+                $set: { ...data }
+            },
+            { new: true },
+        );
+        if (!updatedAds) {
+            throw new GraphQLError("Modified forbidden")
+        } else return updatedAds
     }
 
     async deleteAdvertisement(id, token) {

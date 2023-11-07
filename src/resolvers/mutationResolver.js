@@ -199,6 +199,12 @@ const mutationResolver = {
             return advertisement;
         },
 
+        updateAdvertisement: async (parent, { updateAdvertisementInput }, contextValue) => {
+            const advertisement = await adminService.updateAdvertisement(updateAdvertisementInput, contextValue.token);
+
+            return advertisement;
+        },
+
         deleteAdvertisement: async (parent, { id }, contextValue) => {
             const advertisement = await adminService.deleteAdvertisement(id, contextValue.token);
 

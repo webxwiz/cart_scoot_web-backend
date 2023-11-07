@@ -38,6 +38,10 @@ export const advertisementTypeDefs = `#graphql
         to: Date
         position: PageTypes
     }
+    input UpdateAdvertisementInput {
+        _id: ID!
+        data: AddAdvertisementInput
+    }
     
     type Query {
         getAllAdvertisements(pageNumber: Int): AdvertisementsWithLimit
@@ -47,6 +51,7 @@ export const advertisementTypeDefs = `#graphql
     }
     type Mutation {
         addAdvertisement(addAdvertisementInput: AddAdvertisementInput): Advertisement
+        updateAdvertisement(updateAdvertisementInput: UpdateAdvertisementInput): Advertisement
         deleteAdvertisement(id: ID!): AdvertisementDeleteResponse        
     }    
 `;
