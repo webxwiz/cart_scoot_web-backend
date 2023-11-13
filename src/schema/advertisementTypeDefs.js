@@ -10,11 +10,16 @@ export const advertisementTypeDefs = `#graphql
         createdAt: Date
         title: String
         description: String
-        imageURL: String
+        imageURL: ImageTypes
         link: String
         from: Date
         to: Date
         position: PageTypes
+    }
+    type ImageTypes {
+        desktop: String
+        tablet: String
+        mobile: String
     }
     type AdvertisementDeleteResponse {        
         AdvertisementStatus: AdvertisementDeleteStatus
@@ -32,11 +37,16 @@ export const advertisementTypeDefs = `#graphql
     input AddAdvertisementInput {
         title: String
         description: String
-        imageURL: String
+        imageURL: ImageTypesInput
         link: String
         from: Date
         to: Date
         position: PageTypes
+    }
+    input ImageTypesInput {
+        desktop: String
+        tablet: String
+        mobile: String
     }
     input UpdateAdvertisementInput {
         _id: ID!
