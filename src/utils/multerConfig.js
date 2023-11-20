@@ -9,7 +9,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 const limits = {
-    fileSize: 10240000, // 10 Mb
+    fileSize: 15729000, // 15 Mb
     files: 10,
     fields: 20
 };
