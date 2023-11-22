@@ -304,7 +304,7 @@ class RequestService {
 
     async changeRequestStatus(requestId, status, token) {
         const { _id } = checkAuth(token);
-        await findUserByIdAndRole(_id, 'RIDER');
+        await findUserById(_id);
 
         const request = await RequestModel.findOneAndUpdate(
             { _id: requestId },
