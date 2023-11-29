@@ -3,10 +3,10 @@ import userService from '../service/userService.js';
 import requestService from '../service/requestService.js';
 import adminService from '../service/adminService.js';
 
+import { statusTypes, userTypes } from '../utils/_index.js';
 
 const queryResolver = {
     Query: {
-
         getUserByToken: async (parent, args, contextValue) => {
             const user = await userService.getUserByToken(contextValue.token);
 
@@ -18,28 +18,41 @@ const queryResolver = {
             return drivers;
         },
         getDriverWithRating: async (parent, { driverId }, contextValue) => {
-            const { rating, driver, totalCount } = await adminService.getDriverWithRating(driverId, contextValue.token);
+            const { rating, driver, totalCount } = await adminService.getDriverWithRating(
+                driverId,
+                contextValue.token
+            );
 
             return { rating, driver, totalCount };
         },
 
         getReviewsByDriverId: async (parent, { getReviewsByDriverIdInput }, contextValue) => {
-            const { reviews, totalCount } = await reviewService.getReviewsByDriverId(getReviewsByDriverIdInput);
+            const { reviews, totalCount } = await reviewService.getReviewsByDriverId(
+                getReviewsByDriverIdInput
+            );
 
             return { reviews, totalCount };
         },
         getAllReviews: async (parent, { getAllReviewsInput }, contextValue) => {
-            const { reviews, totalCount } = await adminService.getAllReviews(getAllReviewsInput, contextValue.token);
+            const { reviews, totalCount } = await adminService.getAllReviews(
+                getAllReviewsInput,
+                contextValue.token
+            );
 
             return { reviews, totalCount };
         },
         getDriverRating: async (parent, args, contextValue) => {
-            const { avgRating, totalCount } = await reviewService.getDriverRating(contextValue.token);
+            const { avgRating, totalCount } = await reviewService.getDriverRating(
+                contextValue.token
+            );
 
             return { avgRating, totalCount };
         },
         getReviewByRequestCode: async (parent, { requestCode }, contextValue) => {
-            const review = await adminService.getReviewByRequestCode(requestCode, contextValue.token);
+            const review = await adminService.getReviewByRequestCode(
+                requestCode,
+                contextValue.token
+            );
 
             return review;
         },
@@ -50,22 +63,34 @@ const queryResolver = {
             return { request, avgRating };
         },
         getAllRequests: async (parent, { getAllRequestsInput }, contextValue) => {
-            const { requests, totalCount } = await adminService.getAllRequests(getAllRequestsInput, contextValue.token);
+            const { requests, totalCount } = await adminService.getAllRequests(
+                getAllRequestsInput,
+                contextValue.token
+            );
 
             return { requests, totalCount };
         },
         getRequestsByRider: async (parent, { getRequestsByFiltersInput }, contextValue) => {
-            const { requests, totalCount } = await requestService.getRequestsByRider(getRequestsByFiltersInput, contextValue.token);
+            const { requests, totalCount } = await requestService.getRequestsByRider(
+                getRequestsByFiltersInput,
+                contextValue.token
+            );
 
             return { requests, totalCount };
         },
         getRequestsByDriver: async (parent, { getRequestsByFiltersInput }, contextValue) => {
-            const { requests, totalCount } = await requestService.getRequestsByDriver(getRequestsByFiltersInput, contextValue.token);
+            const { requests, totalCount } = await requestService.getRequestsByDriver(
+                getRequestsByFiltersInput,
+                contextValue.token
+            );
 
             return { requests, totalCount };
         },
         getPendingRequestsByDriver: async (parent, args, contextValue) => {
-            const requests = await requestService.getPendingRequestsByDriver('PENDING', contextValue.token);
+            const requests = await requestService.getPendingRequestsByDriver(
+                statusTypes.pending,
+                contextValue.token
+            );
 
             return requests;
         },
@@ -76,17 +101,27 @@ const queryResolver = {
         },
 
         getStatistic: async (parent, args, contextValue) => {
-            const { totalRiders, totalDrivers, totalTrips } = await adminService.getStatistic(contextValue.token);
+            const { totalRiders, totalDrivers, totalTrips } = await adminService.getStatistic(
+                contextValue.token
+            );
 
             return { totalRiders, totalDrivers, totalTrips };
         },
         getAllDrivers: async (parent, { getAllUsersInput }, contextValue) => {
-            const { users, totalCount } = await adminService.getProfilesByRole('DRIVER', getAllUsersInput, contextValue.token)
+            const { users, totalCount } = await adminService.getProfilesByRole(
+                userTypes.driver,
+                getAllUsersInput,
+                contextValue.token
+            );
 
             return { users, totalCount };
         },
         getAllRiders: async (parent, { getAllUsersInput }, contextValue) => {
-            const { users, totalCount } = await adminService.getProfilesByRole('RIDER', getAllUsersInput, contextValue.token)
+            const { users, totalCount } = await adminService.getProfilesByRole(
+                userTypes.rider,
+                getAllUsersInput,
+                contextValue.token
+            );
 
             return { users, totalCount };
         },
@@ -97,12 +132,18 @@ const queryResolver = {
             return users;
         },
         getAllAdvertisements: async (parent, { pageNumber }, contextValue) => {
-            const { advertisements, totalCount } = await adminService.getAllAdvertisements(pageNumber, contextValue.token);
+            const { advertisements, totalCount } = await adminService.getAllAdvertisements(
+                pageNumber,
+                contextValue.token
+            );
 
             return { advertisements, totalCount };
         },
         getAdvertisementById: async (parent, { adsId }, contextValue) => {
-            const advertisement = await adminService.getAdvertisementById(adsId, contextValue.token);
+            const advertisement = await adminService.getAdvertisementById(
+                adsId,
+                contextValue.token
+            );
 
             return advertisement;
         },

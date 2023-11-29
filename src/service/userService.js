@@ -8,10 +8,17 @@ import ReviewModel from '../models/Review.js';
 import AdvertisementModel from '../models/Advertisement.js';
 
 import { userValidate } from '../validation/userValidation.js';
-import { createPasswordHash, generateToken, checkAuth, findUserById, mailSender, smsSender } from '../utils/_index.js';
+import {
+    createPasswordHash,
+    generateToken,
+    checkAuth,
+    findUserById,
+    mailSender,
+    smsSender,
+    licenseTypes,
+} from '../utils/_index.js';
 
 class UserService {
-
     async getUserByToken(token) {
         const { _id } = checkAuth(token);
         const user = await findUserById(_id);
@@ -22,8 +29,8 @@ class UserService {
     async getProfileById(_id, role) {
         const user = await UserModel.findOne({ _id, role });
         if (!user) {
-            throw new GraphQLError("Can't find user")
-        };
+            throw new GraphQLError("Can't find user");
+        }
 
         return user;
     }
@@ -32,19 +39,21 @@ class UserService {
         const smsCode = crypto.randomInt(100000, 999999);
         const smsSendResult = await smsSender(`Your secret code is ${smsCode}`, phone);
         if (!smsSendResult) {
-            throw new GraphQLError("Can't send SMS. Check your number")
-        };
+            throw new GraphQLError("Can't send SMS. Check your number");
+        }
         return {
             code: smsCode,
-            expire: Date.now() + (3600 * 1000),
+            expire: Date.now() + 3600 * 1000,
             updated: Date.now(),
-        }
+        };
     }
 
     async fullRegisterByPhone({ phone, userName, role }) {
         const candidate = await UserModel.findOne({ 'phone.number': phone });
         if (candidate) {
-            throw new GraphQLError(`User ${phone} already exist. Please login`, { extensions: { code: 'BAD_USER_INPUT' } })
+            throw new GraphQLError(`User ${phone} already exist. Please login`, {
+                extensions: { code: 'BAD_USER_INPUT' },
+            });
         }
 
         const phoneCode = await this.sendSmsToPhone(phone);
@@ -56,7 +65,7 @@ class UserService {
             role,
         });
         if (!user) {
-            throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
+            throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } });
         }
 
         return user;
@@ -69,12 +78,12 @@ class UserService {
             const updatedUser = await UserModel.findOneAndUpdate(
                 { _id: candidate._id },
                 {
-                    $set: { phoneCode }
+                    $set: { phoneCode },
                 },
-                { new: true },
+                { new: true }
             );
             if (!updatedUser) {
-                throw new GraphQLError("Modified forbidden")
+                throw new GraphQLError('Modified forbidden');
             } else return updatedUser;
         } else {
             const user = await UserModel.create({
@@ -84,25 +93,25 @@ class UserService {
             });
 
             if (!user) {
-                throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
+                throw new GraphQLError('Database Error', {
+                    extensions: { code: 'DATABASE_ERROR' },
+                });
             } else return user;
         }
     }
 
     async loginByPhone({ phone, smsCode }) {
-        const user = await UserModel.findOne(
-            {
-                'phone.number': phone,
-                'phoneCode.code': smsCode,
-                'phoneCode.expire': { $gt: Date.now() },
-            },
-        );
+        const user = await UserModel.findOne({
+            'phone.number': phone,
+            'phoneCode.code': smsCode,
+            'phoneCode.expire': { $gt: Date.now() },
+        });
         if (!user) {
-            throw new GraphQLError("Can't login user. Try again")
+            throw new GraphQLError("Can't login user. Try again");
         } else {
             const token = generateToken(user._id, user.role);
 
-            return { user, token }
+            return { user, token };
         }
     }
 
@@ -111,7 +120,9 @@ class UserService {
         const { email, password } = data;
         const candidate = await UserModel.findOne({ email });
         if (candidate) {
-            throw new GraphQLError(`User ${email} already exist. Please login`, { extensions: { code: 'BAD_USER_INPUT' } })
+            throw new GraphQLError(`User ${email} already exist. Please login`, {
+                extensions: { code: 'BAD_USER_INPUT' },
+            });
         }
         const passwordHash = await createPasswordHash(password);
         const user = await UserModel.create({
@@ -120,7 +131,7 @@ class UserService {
         });
 
         if (!user) {
-            throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } })
+            throw new GraphQLError('Database Error', { extensions: { code: 'DATABASE_ERROR' } });
         }
         const token = generateToken(user._id, user.role);
 
@@ -132,15 +143,17 @@ class UserService {
         const { email, password } = data;
         const user = await UserModel.findOne({ email });
         if (!user) {
-            throw new GraphQLError("Can't find user", { extensions: { code: 'BAD_USER_INPUT' } })
+            throw new GraphQLError("Can't find user", { extensions: { code: 'BAD_USER_INPUT' } });
         }
-        const isValidPass = await bcrypt.compare(password, user.passwordHash)
+        const isValidPass = await bcrypt.compare(password, user.passwordHash);
         if (!isValidPass) {
-            throw new GraphQLError('Incorrect login or password', { extensions: { code: 'BAD_USER_INPUT' } })
+            throw new GraphQLError('Incorrect login or password', {
+                extensions: { code: 'BAD_USER_INPUT' },
+            });
         }
         const token = generateToken(user._id, user.role);
 
-        return { user, token }
+        return { user, token };
     }
 
     async addMobilePhone(phone, token) {
@@ -149,19 +162,21 @@ class UserService {
 
         const user = await UserModel.findOne({ 'phone.number': phone });
         if (user) {
-            throw new GraphQLError("This mobile phone already exist!", { extensions: { code: 'BAD_USER_INPUT' } })
+            throw new GraphQLError('This mobile phone already exist!', {
+                extensions: { code: 'BAD_USER_INPUT' },
+            });
         }
 
         const phoneCode = await this.sendSmsToPhone(phone);
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
             {
-                $set: { 'phone.number': phone, phoneCode }
+                $set: { 'phone.number': phone, phoneCode },
             },
-            { new: true },
+            { new: true }
         );
         if (!updatedUser) {
-            throw new GraphQLError("Modified forbidden")
+            throw new GraphQLError('Modified forbidden');
         } else return updatedUser;
     }
 
@@ -176,15 +191,15 @@ class UserService {
             },
             {
                 $set: {
-                    'phoneCode.code': "",
+                    'phoneCode.code': '',
                     'phoneCode.expire': Date.now(),
                     'phone.confirmed': true,
-                }
+                },
             },
-            { new: true },
+            { new: true }
         );
         if (!user) {
-            throw new GraphQLError("Can't confirm your phone. Try again")
+            throw new GraphQLError("Can't confirm your phone. Try again");
         }
 
         return user;
@@ -197,13 +212,13 @@ class UserService {
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
             {
-                $set: { ...data }
+                $set: { ...data },
             },
-            { new: true },
+            { new: true }
         );
         if (!updatedUser) {
-            throw new GraphQLError("Modified forbidden")
-        } else return updatedUser
+            throw new GraphQLError('Modified forbidden');
+        } else return updatedUser;
     }
 
     async delete(id, token) {
@@ -215,7 +230,7 @@ class UserService {
 
             return userStatus;
         } else {
-            throw new GraphQLError("Authorization error")
+            throw new GraphQLError('Authorization error');
         }
     }
 
@@ -223,11 +238,11 @@ class UserService {
         await userValidate({ email });
         const user = await UserModel.findOne({ email });
         if (!user) {
-            throw new GraphQLError("Can't find user", { extensions: { code: 'BAD_USER_INPUT' } })
+            throw new GraphQLError("Can't find user", { extensions: { code: 'BAD_USER_INPUT' } });
         }
 
         const buffer = crypto.randomBytes(16);
-        if (!buffer) throw new GraphQLError("Something get wrong")
+        if (!buffer) throw new GraphQLError('Something get wrong');
         const token = buffer.toString('hex');
 
         await mailSender({
@@ -246,12 +261,12 @@ class UserService {
             { email },
             {
                 'resetPassword.token': token,
-                'resetPassword.expire': Date.now() + (3600 * 1000),
+                'resetPassword.expire': Date.now() + 3600 * 1000,
             },
-            { new: true },
+            { new: true }
         );
         if (!updatedUser) {
-            throw new GraphQLError("Can't reset password")
+            throw new GraphQLError("Can't reset password");
         } else return true;
     }
 
@@ -267,12 +282,12 @@ class UserService {
                     'resetPassword.token': null,
                     'resetPassword.expire': null,
                     'resetPassword.changed': Date.now(),
-                }
+                },
             },
-            { new: true },
+            { new: true }
         );
         if (!updatedUser) {
-            throw new GraphQLError("Can't set new password")
+            throw new GraphQLError("Can't set new password");
         } else return updatedUser;
     }
 
@@ -284,47 +299,47 @@ class UserService {
 
         const isValidPass = await bcrypt.compare(currentPassword, user.passwordHash);
         if (!isValidPass) {
-            throw new GraphQLError("Wrong password!")
+            throw new GraphQLError('Wrong password!');
         } else {
             const passwordHash = await createPasswordHash(password);
             const updatedUser = await UserModel.findOneAndUpdate(
                 { _id },
                 { passwordHash },
-                { new: true },
+                { new: true }
             );
             if (!updatedUser) {
-                throw new GraphQLError("Can't change password")
+                throw new GraphQLError("Can't change password");
             }
             return updatedUser;
         }
     }
 
     async getFreeDrivers({ requestedTime }) {
-
         let drivers;
         if (requestedTime) {
             const dayOfWeek = new Date(requestedTime).getDay();
-            const time = +`${new Date(requestedTime).getHours()}.${new Date(requestedTime).getMinutes()}`
+            const time = +`${new Date(requestedTime).getHours()}.${new Date(
+                requestedTime
+            ).getMinutes()}`;
             drivers = await UserModel.find({
                 workingDays: { $in: dayOfWeek },
                 'workingTime.from': { $lte: time },
                 'workingTime.to': { $gt: time },
                 role: 'DRIVER',
-                'license.status': 'APPROVED',
+                'license.status': licenseTypes.approved,
                 banned: { $ne: true },
             });
         } else {
             drivers = await UserModel.find({
                 role: 'DRIVER',
-                'license.status': 'APPROVED',
+                'license.status': licenseTypes.approved,
                 banned: { $ne: true },
             });
         }
 
-        const driverIds = drivers.map(driver => driver._id);
+        const driverIds = drivers.map((driver) => driver._id);
 
-        const driverReviews = await ReviewModel
-            .aggregate()
+        const driverReviews = await ReviewModel.aggregate()
             .match({ driverId: { $in: driverIds } })
             .group({
                 _id: '$driverId',
@@ -332,27 +347,34 @@ class UserService {
                 avgRating: { $avg: '$rating' },
             });
 
-        const driverWithRating = drivers.map(driver => {
+        const driverWithRating = drivers.map((driver) => {
             return {
                 driver,
-                rating: Math.round(driverReviews.find(item => item._id.toString() === driver._id.toString())?.avgRating * 10) / 10 || 0,
-            }
-        })
+                rating:
+                    Math.round(
+                        driverReviews.find((item) => item._id.toString() === driver._id.toString())
+                            ?.avgRating * 10
+                    ) / 10 || 0,
+            };
+        });
 
         return driverWithRating;
     }
 
     async getPageAdvertisement(position) {
-        const advertisement = await AdvertisementModel.find(
-            { position, from: { $lte: Date.now() }, to: { $gte: Date.now() } })
+        const advertisement = await AdvertisementModel.find({
+            position,
+            from: { $lte: Date.now() },
+            to: { $gte: Date.now() },
+        })
             .sort({ updatedAt: -1 })
             .limit(1);
         if (!advertisement) {
-            throw new GraphQLError("Can't get advertisement")
+            throw new GraphQLError("Can't get advertisement");
         }
 
         return advertisement[0];
     }
 }
 
-export default new UserService;
+export default new UserService();

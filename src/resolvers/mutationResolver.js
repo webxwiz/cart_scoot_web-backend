@@ -1,9 +1,9 @@
 import adminService from '../service/adminService.js';
 import requestService from '../service/requestService.js';
 import reviewService from '../service/reviewService.js';
-import uploadService from '../service/uploadService.js';
 import userService from '../service/userService.js';
 
+import { statusTypes, userTypes } from '../utils/_index.js';
 
 const mutationResolver = {
     Mutation: {
@@ -17,7 +17,10 @@ const mutationResolver = {
             };
         },
         loginByEmail: async (parent, { email, password }) => {
-            const { user, token } = await userService.loginByEmail({ email, password });
+            const { user, token } = await userService.loginByEmail({
+                email,
+                password,
+            });
 
             return {
                 user,
@@ -68,7 +71,7 @@ const mutationResolver = {
 
             return {
                 userStatus,
-                message: 'User successfully deleted'
+                message: 'User successfully deleted',
             };
         },
         changeUserName: async (parent, { changeUserNameInput }, contextValue) => {
@@ -109,7 +112,7 @@ const mutationResolver = {
             if (user) {
                 return {
                     status: true,
-                    message: "Password successfully updated",
+                    message: 'Password successfully updated',
                 };
             }
         },
@@ -121,7 +124,11 @@ const mutationResolver = {
         },
 
         createOneDriverRequest: async (parent, { createOneDriverRequestInput }, contextValue) => {
-            const request = await requestService.createOneDriverRequest(createOneDriverRequestInput, 'RIDER', contextValue.token);
+            const request = await requestService.createOneDriverRequest(
+                createOneDriverRequestInput,
+                userTypes.rider,
+                contextValue.token
+            );
 
             return {
                 request,
@@ -130,35 +137,56 @@ const mutationResolver = {
         },
 
         createDriversRequest: async (parent, { createDriversRequestInput }, contextValue) => {
-            const { request, message } = await requestService.createDriversRequest(createDriversRequestInput, 'RIDER', contextValue.token);
+            const { request, message } = await requestService.createDriversRequest(
+                createDriversRequestInput,
+                userTypes.rider,
+                contextValue.token
+            );
 
             return { request, message };
         },
 
         driverOneCallAnswer: async (parent, { driverOneCallAnswerInput }, contextValue) => {
-            const request = await requestService.driverOneCallAnswer(driverOneCallAnswerInput, contextValue.token);
+            const request = await requestService.driverOneCallAnswer(
+                driverOneCallAnswerInput,
+                contextValue.token
+            );
 
             return request;
         },
         driverMultiCallAnswer: async (parent, { driverMultiCallAnswerInput }, contextValue) => {
-            const request = await requestService.driverMultiCallAnswer(driverMultiCallAnswerInput, contextValue.token);
+            const request = await requestService.driverMultiCallAnswer(
+                driverMultiCallAnswerInput,
+                contextValue.token
+            );
 
             return request;
         },
 
         riderMultiCallAnswer: async (parent, { riderMultiCallAnswerInput }, contextValue) => {
-            const request = await requestService.riderMultiCallAnswer(riderMultiCallAnswerInput, contextValue.token);
+            const request = await requestService.riderMultiCallAnswer(
+                riderMultiCallAnswerInput,
+                contextValue.token
+            );
 
             return request;
         },
 
         cancelRequest: async (parent, { requestId }, contextValue) => {
-            const requestStatus = await requestService.changeRequestStatus(requestId, "REJECTED", contextValue.token);
+            const requestStatus = await requestService.changeRequestStatus(
+                requestId,
+                statusTypes.cancelled,
+                contextValue.token
+            );
 
             return requestStatus;
         },
         finishRequest: async (parent, { requestId }, contextValue) => {
-            const request = await requestService.changeRequestStatus(requestId, "FINISHED", contextValue.token);
+            const request = await requestService.changeRequestStatus(
+                requestId,
+                statusTypes.finished,
+                contextValue.token
+            );
 
             return request;
         },
@@ -181,11 +209,13 @@ const mutationResolver = {
         },
 
         answerDriverLicense: async (parent, { answerDriverLicenseInput }, contextValue) => {
-            const user = await adminService.answerDriverLicense(answerDriverLicenseInput, contextValue.token);
+            const user = await adminService.answerDriverLicense(
+                answerDriverLicenseInput,
+                contextValue.token
+            );
 
             return user;
         },
-
 
         changeUserStatus: async (parent, { _id, status }, contextValue) => {
             const user = await adminService.changeBunStatus(_id, status, contextValue.token);
@@ -194,13 +224,19 @@ const mutationResolver = {
         },
 
         addAdvertisement: async (parent, { addAdvertisementInput }, contextValue) => {
-            const advertisement = await adminService.addAdvertisement(addAdvertisementInput, contextValue.token);
+            const advertisement = await adminService.addAdvertisement(
+                addAdvertisementInput,
+                contextValue.token
+            );
 
             return advertisement;
         },
 
         updateAdvertisement: async (parent, { updateAdvertisementInput }, contextValue) => {
-            const advertisement = await adminService.updateAdvertisement(updateAdvertisementInput, contextValue.token);
+            const advertisement = await adminService.updateAdvertisement(
+                updateAdvertisementInput,
+                contextValue.token
+            );
 
             return advertisement;
         },
@@ -210,8 +246,7 @@ const mutationResolver = {
 
             return advertisement;
         },
-
-    }
+    },
 };
 
 export { mutationResolver };

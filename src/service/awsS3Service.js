@@ -12,14 +12,12 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 class awsS3Service {
-
     async uploadImageToS3(file, keyName) {
-
         const params = {
             Bucket: process.env.AWS_BUCKET_NAME,
             Key: keyName,
             Body: file,
-            ContentType: 'image/webp'
+            ContentType: 'image/webp',
         };
 
         try {
@@ -35,7 +33,7 @@ class awsS3Service {
     async deleteImageFromS3(keyName) {
         const params = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: keyName
+            Key: keyName,
         };
 
         try {
@@ -47,7 +45,6 @@ class awsS3Service {
             throw new GraphQLError(error.code + ': ' + error.message);
         }
     }
-
 }
 
-export default new awsS3Service;
+export default new awsS3Service();

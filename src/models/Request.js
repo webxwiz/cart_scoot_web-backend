@@ -17,7 +17,7 @@ const requestSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['PENDING', 'REJECTED', 'APPROVED', 'ACTIVE', 'FINISHED'],
+        enum: ['PENDING', 'CANCELLED', 'APPROVED', 'ACTIVE', 'FINISHED'],
         default: 'PENDING',
     },
     carType: {

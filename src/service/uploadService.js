@@ -3,23 +3,22 @@ import { basename } from 'path';
 import { GraphQLError } from 'graphql';
 
 import UserModel from '../models/User.js';
-import { findUserById } from '../utils/_index.js';
+import { findUserById, licenseTypes } from '../utils/_index.js';
 
 class UploadService {
-
     async uploadAvatarUrl(_id, avatarURL) {
         await findUserById(_id);
 
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
             {
-                $set: { avatarURL }
+                $set: { avatarURL },
             },
-            { new: true },
+            { new: true }
         );
         if (!updatedUser) {
-            throw new GraphQLError("Modified forbidden")
-        } else return updatedUser
+            throw new GraphQLError('Modified forbidden');
+        } else return updatedUser;
     }
 
     async deleteAvatarUrl(_id) {
@@ -28,7 +27,7 @@ class UploadService {
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
             { avatarURL: null },
-            { new: true },
+            { new: true }
         );
 
         return updatedUser;
@@ -41,30 +40,30 @@ class UploadService {
             { _id },
             {
                 $push: { 'license.url': licenseURL },
-                $set: { 'license.status': 'WAITING' }
+                $set: { 'license.status': licenseTypes.waiting },
             },
-            { new: true },
+            { new: true }
         );
         if (!updatedUser) {
-            throw new GraphQLError("Modified forbidden")
-        } else return updatedUser
+            throw new GraphQLError('Modified forbidden');
+        } else return updatedUser;
     }
 
     async deleteLicenseUrl(_id) {
         const user = await findUserById(_id);
 
-        const imageKeyList = user.license.url.map(item => basename(item));
+        const imageKeyList = user.license.url.map((item) => basename(item));
 
         const updatedUser = await UserModel.findOneAndUpdate(
             { _id },
             { 'license.url': [] },
-            { new: true },
+            { new: true }
         );
 
         if (!updatedUser) {
-            throw new GraphQLError("Modified forbidden")
+            throw new GraphQLError('Modified forbidden');
         } else return { imageKeyList, updatedUser };
     }
 }
 
-export default new UploadService;
+export default new UploadService();

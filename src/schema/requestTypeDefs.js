@@ -2,7 +2,7 @@ export const requestTypeDefs = `#graphql
     scalar Date
     enum statusTypes {
         PENDING
-        REJECTED
+        CANCELLED
         APPROVED
         ACTIVE
         FINISHED
