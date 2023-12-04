@@ -378,22 +378,24 @@ class RequestService {
             throw new GraphQLError('Modified forbidden');
         }
 
-        const {
-            email,
-            phone: { number, confirmed },
-        } = await findUserById(request.driverId);
+        if (request?.driverId) {
+            const {
+                email,
+                phone: { number, confirmed },
+            } = await findUserById(request.driverId);
 
-        if (number && confirmed) {
-            await smsSender(`The request ${request.requestCode} has status ${status}`, number);
-        } else if (email) {
-            await mailSender({
-                to: email,
-                subject: 'Request status',
-                text: `The request ${request.requestCode} has status ${status}`,
-                html: `
-                    <h2>The request ${request.requestCode} has status ${status}</h2>                        
-                `,
-            });
+            if (number && confirmed) {
+                await smsSender(`The request ${request.requestCode} has status ${status}`, number);
+            } else if (email) {
+                await mailSender({
+                    to: email,
+                    subject: 'Request status',
+                    text: `The request ${request.requestCode} has status ${status}`,
+                    html: `
+                        <h2>The request ${request.requestCode} has status ${status}</h2>                        
+                    `,
+                });
+            }
         }
 
         return request;
