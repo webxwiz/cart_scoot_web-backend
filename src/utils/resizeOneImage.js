@@ -4,6 +4,7 @@ export const resizeOneImage = async (buffer, size) => {
 
     return await sharp(buffer)
         .resize(size, size)
+        .rotate()
         .webp()
         .toBuffer()
 }
@@ -11,6 +12,7 @@ export const resizeOneImage = async (buffer, size) => {
 export const oneImageToWebp = async (buffer) => {
 
     return await sharp(buffer)
+        .rotate()
         .webp()
         .toBuffer()
 }
