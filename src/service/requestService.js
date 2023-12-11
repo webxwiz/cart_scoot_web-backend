@@ -136,7 +136,7 @@ class RequestService {
         } else if (email) {
             await mailSender({
                 to: email,
-                subject: 'Car Rent Request',
+                subject: 'Cart Rent Request',
                 text: 'New car rent request!',
                 html: `
                     <h2>Hello!</h2>
@@ -203,7 +203,7 @@ class RequestService {
             for (const email of driverEmails) {
                 const status = await mailSender({
                     to: email,
-                    subject: 'Car Rent Request',
+                    subject: 'Cart Rent Request',
                     text: 'New car rent request!',
                     html: `
                         <h2>Hello!</h2>
