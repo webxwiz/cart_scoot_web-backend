@@ -18,9 +18,9 @@ import { queryResolver, mutationResolver } from "./resolvers/_index.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { logger } from './utils/_index.js';
 import router from './router/router.js';
+import requestService from "./service/requestService.js";
 
 import 'dotenv/config';
-import requestService from "./service/requestService.js";
 
 mongoose
     .connect(process.env.MONGO_DB)
