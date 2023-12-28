@@ -1,5 +1,5 @@
-import express from "express";
-import mongoose from "mongoose";
+import express from 'express';
+import mongoose from 'mongoose';
 import cors from 'cors';
 import http from 'http';
 
@@ -13,19 +13,24 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 
-import { advertisementTypeDefs, requestTypeDefs, reviewTypeDefs, userTypeDefs } from "./schema/_index.js";
-import { queryResolver, mutationResolver } from "./resolvers/_index.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
+import {
+    advertisementTypeDefs,
+    requestTypeDefs,
+    reviewTypeDefs,
+    userTypeDefs,
+} from './schema/_index.js';
+import { queryResolver, mutationResolver } from './resolvers/_index.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 import { logger } from './utils/_index.js';
 import router from './router/router.js';
-import requestService from "./service/requestService.js";
+import requestService from './service/requestService.js';
 
 import 'dotenv/config';
 
 mongoose
     .connect(process.env.MONGO_DB)
     .then(() => logger.info('Mongo DB successfully connected...'))
-    .catch((err) => logger.error(`Mongo DB Error: ${err}`))
+    .catch((err) => logger.error(`Mongo DB Error: ${err}`));
 
 const app = express();
 
@@ -67,19 +72,20 @@ const server = new ApolloServer({
 
 await server.start();
 
-app.use('/graphql', cors(),
+app.use(
+    '/graphql',
+    cors(),
     expressMiddleware(server, {
         context: async ({ req, res }) => {
             const token = req.headers.authorization || '';
             return { token };
         },
-    }),
+    })
 );
 
-// schedule.scheduleJob('22 * * * *', async function () {
-//     await requestService.changeStatusOfOutdatedRequests()
-// });
-
+schedule.scheduleJob('22 22 * * *', async function () {
+    await requestService.changeStatusOfOutdatedRequests();
+});
 
 app.use(errorHandler);
 

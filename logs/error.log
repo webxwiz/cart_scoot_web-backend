@@ -1,7 +1,2 @@
 
-[error] : [2023-08-22T19:49:34.101Z] - Mongo DB Error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.hsqojmx.mongodb.net
-[error] : [2023-08-27T09:16:39.012Z] - No recipients defined
-[error] : [2023-09-11T13:10:28.169Z] - Unauthorized
-[error] : [2023-09-22T17:35:33.066Z] - A 'To' phone number is required.: Can't send sms to 
-[error] : [2023-09-22T17:45:35.854Z] - Required parameter "params['to']" missing.: Can't send sms to undefined
-[error] : [2023-09-22T17:49:04.737Z] - Required parameter "params['to']" missing.: Can't send sms to undefined
+
